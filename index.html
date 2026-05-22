@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HỘI THI LLTG BVANTT Ở CƠ SỞ GIỎI CỤM THI SỐ 1 TỈNH ĐIỆN BIÊN, NĂM 2026</title>
+<title>HỘI THI LLTP BVANTT Ở CƠ SỞ GIỎI – CỤM THI SỐ 1, TỈNH ĐIỆN BIÊN</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap');
   :root {
@@ -212,8 +212,8 @@
 <div class="screen active" id="setupScreen">
   <div class="header" style="width:100%">
     <div class="stars">★ ★ ★ ★ ★</div>
-    <h1>HỘI THI LỰC LƯỢNG THAM GIA BẢO VỆ ANTT Ở CƠ SỞ GIỎI CỤM THI SỐ 1, TỈNH ĐIỆN BIÊN (LẦN THỨ I) 2026</h1>
-    <div class="subtitle">PHẦN THI KIẾN THỨC</div>
+    <h1>HỘI THI LỰC LƯỢNG THAM GIA BẢO VỆ AN NINH, TRẬT TỰ Ở CƠ SỞ GIỎI<br>CỤM THI SỐ 1, TỈNH ĐIỆN BIÊN</h1>
+    <div class="subtitle">BỘ CÔNG AN – PHẦN THI TRẮC NGHIỆM</div>
   </div>
   <div class="setup-content">
     <h2>NHẬP TÊN CÁC ĐỘI THI</h2>
@@ -229,8 +229,8 @@
 <div class="screen" id="homeScreen">
   <div class="header" style="width:100%">
     <div class="stars">★ ★ ★ ★ ★</div>
-    <h1>HỘI THI LỰC LƯỢNG THAM GIA BẢO VỆ ANTT Ở CƠ SỞ GIỎI CỤM THI SỐ 1, TỈNH ĐIỆN BIÊN (LẦN THỨ I) 2026</h1>
-    <div class="subtitle">PHẦN THI KIẾN THỨC</div>
+    <h1>HỘI THI LỰC LƯỢNG THAM GIA BẢO VỆ AN NINH, TRẬT TỰ Ở CƠ SỞ GIỎI<br>CỤM THI SỐ 1, TỈNH ĐIỆN BIÊN</h1>
+    <div class="subtitle">BỘ CÔNG AN – PHẦN THI TRẮC NGHIỆM</div>
   </div>
   <div class="home-content">
     <h2>BẢNG ĐIỂM CÁC ĐỘI</h2>
@@ -239,7 +239,7 @@
       Đội giành quyền: đúng <strong style="color:var(--green)">+2 điểm</strong> &nbsp;·&nbsp; sai <strong style="color:var(--wrong)">-1 điểm</strong>
     </p>
     <div class="teams-grid" id="teamsGrid"></div>
-    <button class="btn-main" onclick="goDraw()">CHỌN GÓI CÂU HỎI</button>
+    <button class="btn-main" onclick="goDraw()">🎲 BỐC THĂM</button>
     <br>
     <button class="btn-secondary" onclick="goScore()">📊 Bảng điểm</button>
     <button class="btn-secondary" onclick="goSetup()" style="margin-left:10px">✏️ Sửa tên đội</button>
@@ -437,6 +437,7 @@ let transferTeam = null;
 let timer5 = null;
 let timer5Sec = 5;
 let answerLocked = false;
+let lastWrongIdx = -1;
 
 // ============================================================
 // AUDIO
@@ -645,19 +646,20 @@ function selectAnswer(idx){
     spawnConfetti();
   }else{
     sndWrong();
+    lastWrongIdx=idx;
     setTimeout(()=>highlightAns(idx,false),200);
     if(!isTransfer){
       // Main team wrong → open transfer panel
       qResults[currentQIdx]='wrong';
       setTimeout(()=>openTransferPanel(),600);
     }else{
-      // Transfer team wrong → -1 point, show answer
+      // Transfer team wrong → -1 point, show audience stage
       if(respondingTeam!==currentTeamIdx){
         teams[respondingTeam].score=Math.max(0,teams[respondingTeam].score-1);
         teams[respondingTeam].penalty++;
       }
       qResults[currentQIdx]='skip';
-      setTimeout(()=>showResult('answer',currentTeamIdx,null,respondingTeam),600);
+      setTimeout(()=>showResult('audience',currentTeamIdx,null,respondingTeam),600);
     }
   }
 }
@@ -676,8 +678,14 @@ function highlightAns(idx,correct){
 function openTransferPanel(){
   isTransfer=true;
   answerLocked=true;  // stay locked until a transfer team is chosen
-  // Reset answer button styles but keep disabled until team is picked
-  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=true;b.classList.remove('selected','wrong','dimmed');});
+  // Reset answer button styles – mark the wrong answer as dimmed & permanently disabled
+  const wrongIdx = lastWrongIdx;
+  document.querySelectorAll('.ans-btn').forEach((b,i)=>{
+    b.disabled=true;
+    b.classList.remove('selected','wrong');
+    if(i===wrongIdx){ b.classList.add('dimmed'); b.setAttribute('data-eliminated','1'); }
+    else { b.classList.remove('dimmed'); }
+  });
 
   const panel=document.getElementById('transferPanel');
   panel.classList.add('show');
@@ -700,9 +708,11 @@ function pickTransferTeam(idx){
   const btn=document.getElementById(`tpBtn${idx}`);
   if(btn)btn.classList.add('active');
   document.getElementById('qTeamBadge').textContent=teams[idx].name+' (đang trả lời)';
-  // Now unlock answer buttons so the selected team can answer
+  // Unlock only non-eliminated answer buttons
   answerLocked=false;
-  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=false;});
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    if(!b.getAttribute('data-eliminated')) b.disabled=false;
+  });
 }
 
 // ============================================================
@@ -718,7 +728,7 @@ function skipQuestion(){
     b.disabled=true;
     if(i===q.ans)b.classList.add('correct');else b.classList.add('dimmed');
   });
-  showResult('answer',currentTeamIdx,null,null);
+  showResult('audience',currentTeamIdx,null,null);
 }
 
 // ============================================================
@@ -747,20 +757,44 @@ function showResult(type,teamIdx,extra,penaltyTeamIdx){
       <br><span style="color:rgba(255,255,255,.55);font-size:13px">Tổng điểm: ${teams[teamIdx].score} điểm</span>`;
     actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
   } else {
-    // Show correct answer
     box.classList.add('a-box');
-    icon.textContent='📋';
-    title.className='r-title gold';title.textContent='ĐÁP ÁN ĐÚNG';
+    icon.textContent='🤔';
+    title.className='r-title gold';
     const q=ALL_PACKS[currentPack][currentQIdx];
     const keys=['A','B','C','D'];
     const penaltyNote=penaltyTeamIdx!==null&&penaltyTeamIdx!==undefined?
-      `<br><span style="color:var(--wrong);font-size:13px">⚠ ${teams[penaltyTeamIdx].name} trả lời sai: -1 điểm (còn ${teams[penaltyTeamIdx].score} điểm)</span>`:'';
-    desc.innerHTML=`${penaltyNote}`;
-    answer.style.display='block';
-    answer.innerHTML=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
-    actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
+      `<span style="color:var(--wrong);font-size:13px">⚠ ${teams[penaltyTeamIdx].name} trả lời sai: -1 điểm (còn ${teams[penaltyTeamIdx].score} điểm)</span><br><br>`:'';
+
+    if(type==='audience'){
+      // Stage 1: audience mode – hide answer, show reveal button
+      title.textContent='KHÁN GIẢ TRẢ LỜI';
+      desc.innerHTML=penaltyNote+'Mời khán giả tham gia!';
+      answer.style.display='none';
+      const ansHtml=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
+      actions.innerHTML=`
+        <button class="r-btn p" onclick="revealAnswer(this,'${ansHtml.replace(/'/g,"\'")}')">📢 CÔNG BỐ ĐÁP ÁN</button>`;
+    } else {
+      // Direct answer reveal (skip / endSession flow)
+      title.textContent='ĐÁP ÁN ĐÚNG';
+      desc.innerHTML=penaltyNote;
+      answer.style.display='block';
+      answer.innerHTML=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
+      actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
+    }
   }
   overlay.classList.add('show');
+}
+
+function revealAnswer(btn, ansHtml){
+  const answer=document.getElementById('rAnswer');
+  const actions=document.getElementById('rActions');
+  const icon=document.getElementById('rIcon');
+  const title=document.getElementById('rTitle');
+  icon.textContent='📋';
+  title.textContent='ĐÁP ÁN ĐÚNG';
+  answer.style.display='block';
+  answer.innerHTML=ansHtml;
+  actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
 }
 
 function hideResult(){document.getElementById('rOverlay').classList.remove('show');}
@@ -854,9 +888,23 @@ function resetAll(){
 
 renderSetup();
 </script>
-<footer>
-  <p>&copy; 2026 Phạm Thanh Hùng. Bảo lưu mọi quyền.</p>
-  <p>Liên hệ: co1tinhiu@gmail.com</p>
+<footer style="
+  width:100%;
+  text-align:center;
+  padding:10px 20px;
+  font-size:12px;
+  color:rgba(255,255,255,0.3);
+  font-family:'Roboto',sans-serif;
+  letter-spacing:1px;
+  border-top:1px solid rgba(255,255,255,0.07);
+  background:rgba(0,0,0,0.3);
+  position:fixed;
+  bottom:0;
+  left:0;
+  z-index:10;
+  pointer-events:none;
+">
+  © CAX Mường Nhé 2026
 </footer>
 </body>
 </html>
