@@ -618,9 +618,9 @@ function highlightAns(idx,correct){
 // ============================================================
 function openTransferPanel(){
   isTransfer=true;
-  answerLocked=false;
-  // Re-enable answer buttons (reset styling except main team's wrong)
-  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong','dimmed');});
+  answerLocked=true;  // stay locked until a transfer team is chosen
+  // Reset answer button styles but keep disabled until team is picked
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=true;b.classList.remove('selected','wrong','dimmed');});
 
   const panel=document.getElementById('transferPanel');
   panel.classList.add('show');
@@ -643,6 +643,9 @@ function pickTransferTeam(idx){
   const btn=document.getElementById(`tpBtn${idx}`);
   if(btn)btn.classList.add('active');
   document.getElementById('qTeamBadge').textContent=teams[idx].name+' (đang trả lời)';
+  // Now unlock answer buttons so the selected team can answer
+  answerLocked=false;
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=false;});
 }
 
 // ============================================================
