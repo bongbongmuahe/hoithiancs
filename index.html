@@ -767,8 +767,8 @@ function showResult(type,teamIdx,extra,penaltyTeamIdx){
 
     if(type==='audience'){
       // Stage 1: audience mode – hide answer, show reveal button
-      title.textContent='KHÁN GIẢ TRẢ LỜI';
-      desc.innerHTML=penaltyNote+'Mời khán giả tham gia!';
+      title.textContent='ĐÁP ÁN KHÔNG CHÍNH XÁC';
+      //desc.innerHTML=penaltyNote+'Mời khán giả tham gia!';
       answer.style.display='none';
       const ansHtml=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
       actions.innerHTML=`
