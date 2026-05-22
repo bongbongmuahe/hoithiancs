@@ -258,6 +258,11 @@
         <div class="tp-title">⚡ CHUYỂN QUYỀN TRẢ LỜI — Chọn đội giành quyền:</div>
         <div class="tp-teams" id="tpTeams"></div>
         <div class="tp-bar" id="tpBar"><div class="tp-fill" id="tpFill" style="width:100%"></div></div>
+        <div id="skipBtnWrap" style="display:none;margin-top:14px;text-align:right">
+          <button onclick="skipQuestion()" style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.3);color:#fff;font-family:Oswald,sans-serif;font-size:14px;font-weight:600;padding:9px 22px;border-radius:22px;cursor:pointer;letter-spacing:1px;transition:all .2s" onmouseover="this.style.borderColor='#f1c40f';this.style.color='#f1c40f'" onmouseout="this.style.borderColor='rgba(255,255,255,0.3)';this.style.color='#fff'">
+            ⏭ BỎ QUA – CÂU TIẾP THEO
+          </button>
+        </div>
       </div>
     </div>
 
@@ -503,6 +508,7 @@ function renderQuestion(){
   // Hide transfer panel & timer
   document.getElementById('transferPanel').classList.remove('show');
   document.getElementById('tpBar').classList.remove('show');
+  document.getElementById('skipBtnWrap').style.display='none';
   hideTimer();
 
   // Nav dots
@@ -551,7 +557,7 @@ function startTimer5(){
     updateTimerUI();
     const pct=Math.max(0,(timer5Sec/5)*100);
     document.getElementById('tpFill').style.width=pct+'%';
-    if(timer5Sec<=0){clearTimer5();}
+    if(timer5Sec<=0){clearTimer5();document.getElementById('skipBtnWrap').style.display='block';}
   },1000);
 }
 
