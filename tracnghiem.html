@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HỘI THI LLTP BVANTT Ở CƠ SỞ GIỎI TOÀN QUỐC 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;500;700&display=swap');
+  :root {
+    --red:#c0392b; --darkred:#922b21; --gold:#f1c40f; --darkgold:#d4ac0d;
+    --navy:#1a2744; --darknavy:#0d1627; --white:#ffffff;
+    --green:#27ae60; --wrong:#e74c3c; --orange:#e67e22;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Roboto',sans-serif;background:var(--darknavy);color:var(--white);min-height:100vh;overflow-x:hidden;}
+
+  .screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+  .screen.active{display:flex;}
+
+  /* HEADER */
+  .header{background:linear-gradient(135deg,var(--red) 0%,var(--darkred) 50%,var(--navy) 100%);text-align:center;padding:28px 20px 18px;width:100%;border-bottom:4px solid var(--gold);position:relative;overflow:hidden;}
+  .header::before{content:'★';position:absolute;font-size:300px;opacity:.03;top:-80px;left:-60px;color:var(--gold);}
+  .header .stars{color:var(--gold);font-size:20px;letter-spacing:6px;margin-bottom:6px;}
+  .header h1{font-family:'Oswald',sans-serif;font-size:clamp(15px,3vw,26px);font-weight:700;text-transform:uppercase;letter-spacing:2px;line-height:1.3;text-shadow:2px 2px 8px rgba(0,0,0,.5);}
+  .header .subtitle{font-size:clamp(11px,1.8vw,15px);color:var(--gold);margin-top:5px;font-weight:300;letter-spacing:1px;}
+
+  /* HOME */
+  #homeScreen{background:radial-gradient(ellipse at center,#1a2744 0%,#0d1627 70%);justify-content:flex-start;}
+  .home-content{max-width:960px;width:100%;padding:36px 20px;text-align:center;}
+  .home-content h2{font-family:'Oswald',sans-serif;font-size:clamp(18px,4vw,32px);color:var(--gold);margin-bottom:10px;text-transform:uppercase;letter-spacing:3px;}
+  .home-content p{color:rgba(255,255,255,.7);margin-bottom:32px;font-size:14px;line-height:1.7;}
+  .teams-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px;}
+  @media(max-width:700px){.teams-grid{grid-template-columns:repeat(2,1fr);}}
+  .team-card{background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border:1px solid rgba(241,196,15,.3);border-radius:12px;padding:18px 10px;text-align:center;transition:all .3s;}
+  .team-card:hover{border-color:var(--gold);background:rgba(241,196,15,.1);transform:translateY(-2px);}
+  .team-card .t-num{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--gold);}
+  .team-card .t-score{font-size:22px;font-weight:700;color:var(--white);margin-top:4px;}
+  .team-card .t-detail{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+  .btn-main{background:linear-gradient(135deg,var(--gold),var(--darkgold));color:var(--navy);border:none;font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;padding:16px 52px;border-radius:50px;cursor:pointer;text-transform:uppercase;letter-spacing:3px;box-shadow:0 8px 30px rgba(241,196,15,.4);transition:all .3s;}
+  .btn-main:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(241,196,15,.5);}
+  .btn-secondary{background:transparent;color:var(--white);border:2px solid rgba(255,255,255,.3);font-family:'Roboto',sans-serif;font-size:14px;padding:9px 26px;border-radius:30px;cursor:pointer;margin-top:14px;transition:all .3s;}
+  .btn-secondary:hover{border-color:var(--white);background:rgba(255,255,255,.1);}
+
+  /* DRAW */
+  #drawScreen{background:radial-gradient(ellipse at center,#1a2744 0%,#0d1627 70%);justify-content:flex-start;}
+  .draw-content{max-width:700px;width:100%;padding:36px 20px;text-align:center;}
+  .draw-team-box{background:rgba(241,196,15,.1);border:2px solid var(--gold);border-radius:14px;padding:18px 28px;margin-bottom:28px;}
+  .draw-team-box h3{font-family:'Oswald',sans-serif;font-size:22px;color:var(--gold);margin-bottom:5px;}
+  .draw-team-box p{color:rgba(255,255,255,.75);font-size:14px;}
+  .draw-title{font-family:'Oswald',sans-serif;font-size:clamp(22px,5vw,38px);color:var(--gold);text-transform:uppercase;letter-spacing:4px;margin-bottom:8px;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+  .draw-sub{color:rgba(255,255,255,.55);margin-bottom:32px;font-size:14px;}
+  .packs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:36px;}
+  @media(max-width:600px){.packs-grid{grid-template-columns:repeat(2,1fr);}}
+  .pack-btn{background:linear-gradient(135deg,rgba(192,57,43,.35),rgba(26,39,68,.8));border:2px solid rgba(241,196,15,.45);border-radius:14px;padding:22px 10px;cursor:pointer;transition:all .35s;text-align:center;position:relative;overflow:hidden;}
+  .pack-btn:hover:not(.used){border-color:var(--gold);background:linear-gradient(135deg,rgba(192,57,43,.65),rgba(26,39,68,.9));transform:scale(1.05);box-shadow:0 8px 28px rgba(241,196,15,.3);}
+  .pack-btn.used{opacity:.25;cursor:not-allowed;border-color:rgba(255,255,255,.1);background:rgba(0,0,0,.3);}
+  .pack-btn.chosen{border-color:var(--green);background:rgba(39,174,96,.2);box-shadow:0 0 20px rgba(39,174,96,.4);animation:selPop .5s;}
+  @keyframes selPop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .pack-num{font-family:'Oswald',sans-serif;font-size:30px;font-weight:700;color:var(--gold);}
+  .pack-label{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+  .pack-btn.used .pack-num{color:rgba(255,255,255,.25);}
+
+  /* PACK REVEAL */
+  .pack-reveal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .35s;}
+  .pack-reveal.show{opacity:1;pointer-events:all;}
+  .pr-box{text-align:center;animation:zoomIn .5s ease;}
+  @keyframes zoomIn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  .pr-num{font-family:'Oswald',sans-serif;font-size:130px;font-weight:700;color:var(--gold);text-shadow:0 0 70px rgba(241,196,15,.85);line-height:1;}
+  .pr-label{font-family:'Oswald',sans-serif;font-size:26px;color:var(--white);text-transform:uppercase;letter-spacing:6px;margin-top:8px;}
+
+  /* QUESTION SCREEN */
+  #questionScreen{background:radial-gradient(ellipse at 20% 50%,rgba(192,57,43,.14) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(26,39,68,.5) 0%,transparent 60%),var(--darknavy);justify-content:flex-start;align-items:stretch;padding:0;}
+  .q-layout{display:flex;flex-direction:column;min-height:100vh;width:100%;}
+
+  /* top bar */
+  .q-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:rgba(0,0,0,.4);border-bottom:2px solid rgba(241,196,15,.3);flex-wrap:wrap;gap:10px;}
+  .q-badges{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .badge{font-family:'Oswald',sans-serif;font-size:13px;padding:5px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:1px;}
+  .badge-red{background:var(--red);color:var(--white);}
+  .badge-gold{background:var(--gold);color:var(--navy);}
+  .badge-orange{background:var(--orange);color:var(--white);}
+  .q-prog{color:rgba(255,255,255,.55);font-size:13px;}
+
+  /* 5-sec timer (only in transfer mode) */
+  .timer-wrap{display:flex;align-items:center;gap:10px;}
+  .timer-circle{width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--pct)*1%),rgba(255,255,255,.1) 0%);display:flex;align-items:center;justify-content:center;position:relative;}
+  .timer-circle::before{content:'';position:absolute;width:48px;height:48px;border-radius:50%;background:var(--darknavy);}
+  .timer-num{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--gold);position:relative;z-index:1;}
+  .timer-num.urgent{color:var(--wrong);animation:blink .5s infinite;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  .timer-circle.hidden-timer{display:none;}
+
+  /* body */
+  .q-body{flex:1;display:flex;flex-direction:column;padding:26px 38px;max-width:1100px;width:100%;margin:0 auto;}
+  @media(max-width:700px){.q-body{padding:18px 14px;}}
+  .q-counter{font-family:'Oswald',sans-serif;font-size:14px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px;}
+  .q-text{font-size:clamp(17px,2.8vw,25px);font-weight:500;line-height:1.55;color:var(--white);margin-bottom:30px;background:rgba(255,255,255,.05);border-left:5px solid var(--gold);border-radius:0 12px 12px 0;padding:18px 22px;min-height:72px;}
+  .ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+  @media(max-width:600px){.ans-grid{grid-template-columns:1fr;}}
+  .ans-btn{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.15);border-radius:13px;padding:16px 18px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:all .22s;text-align:left;color:var(--white);font-family:'Roboto',sans-serif;font-size:clamp(13px,1.9vw,15px);line-height:1.4;}
+  .ans-btn:hover:not(:disabled){border-color:rgba(241,196,15,.55);background:rgba(241,196,15,.08);transform:translateX(3px);}
+  .ans-btn:disabled{cursor:default;}
+  .ans-btn.selected{border-color:var(--gold);background:rgba(241,196,15,.14);}
+  .ans-btn.correct{border-color:var(--green)!important;background:rgba(39,174,96,.22)!important;animation:cpop .45s ease;}
+  @keyframes cpop{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+  .ans-btn.wrong{border-color:var(--wrong)!important;background:rgba(231,76,60,.15)!important;}
+  .ans-btn.dimmed{opacity:.3;}
+  .ans-key{font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;color:var(--gold);min-width:24px;flex-shrink:0;}
+  .ans-btn.correct .ans-key{color:var(--green);}
+  .ans-btn.wrong .ans-key{color:var(--wrong);}
+
+  /* TRANSFER PANEL */
+  .transfer-panel{background:rgba(230,126,34,.1);border:2px solid var(--orange);border-radius:14px;padding:18px 22px;display:none;}
+  .transfer-panel.show{display:block;}
+  .tp-title{font-family:'Oswald',sans-serif;font-size:15px;color:var(--orange);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .tp-teams{display:flex;flex-wrap:wrap;gap:9px;}
+  .tp-team-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);font-family:'Oswald',sans-serif;font-size:14px;padding:8px 17px;border-radius:20px;cursor:pointer;transition:all .2s;}
+  .tp-team-btn:hover{background:rgba(255,255,255,.2);border-color:var(--gold);}
+  .tp-team-btn.active{background:var(--orange);border-color:var(--orange);}
+  .tp-bar{height:7px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:12px;overflow:hidden;display:none;}
+  .tp-bar.show{display:block;}
+  .tp-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:4px;transition:width 1s linear;}
+
+  /* Q NAV DOTS */
+  .q-nav{display:flex;gap:7px;flex-wrap:wrap;padding:0 38px 18px;max-width:1100px;width:100%;margin:0 auto;}
+  @media(max-width:700px){.q-nav{padding:0 14px 14px;}}
+  .q-dot{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.45);font-size:12px;font-family:'Oswald',sans-serif;display:flex;align-items:center;justify-content:center;}
+  .q-dot.cur{border-color:var(--gold);color:var(--gold);animation:dpulse 1.2s infinite;}
+  @keyframes dpulse{0%,100%{box-shadow:0 0 0 0 rgba(241,196,15,.4)}50%{box-shadow:0 0 0 7px rgba(241,196,15,0)}}
+  .q-dot.ok{background:var(--green);border-color:var(--green);color:var(--white);}
+  .q-dot.ko{background:var(--wrong);border-color:var(--wrong);color:var(--white);}
+  .q-dot.skip{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
+
+  /* RESULT OVERLAY */
+  .r-overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;pointer-events:none;opacity:0;transition:opacity .28s;}
+  .r-overlay.show{opacity:1;pointer-events:all;}
+  .r-box{background:rgba(0,0,0,.88);backdrop-filter:blur(18px);border-radius:22px;padding:44px 55px;text-align:center;max-width:580px;width:90%;border:3px solid transparent;position:relative;}
+  .r-box.c-box{border-color:var(--green);box-shadow:0 0 60px rgba(39,174,96,.5);}
+  .r-box.a-box{border-color:var(--gold);box-shadow:0 0 60px rgba(241,196,15,.4);}
+  .r-icon{font-size:66px;margin-bottom:14px;animation:ibounce .55s;}
+  @keyframes ibounce{0%{transform:scale(0)}60%{transform:scale(1.22)}100%{transform:scale(1)}}
+  .r-title{font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:10px;}
+  .r-title.green{color:var(--green);}
+  .r-title.gold{color:var(--gold);}
+  .r-desc{color:rgba(255,255,255,.75);font-size:15px;margin-bottom:10px;line-height:1.6;}
+  .r-answer{margin-top:14px;background:rgba(241,196,15,.1);border:1px solid var(--gold);border-radius:11px;padding:12px 18px;font-size:15px;line-height:1.5;color:var(--white);}
+  .r-answer strong{color:var(--gold);}
+  .r-actions{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+  .r-btn{padding:13px 30px;border-radius:30px;border:none;font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;}
+  .r-btn:hover{transform:translateY(-2px);}
+  .r-btn.p{background:var(--gold);color:var(--navy);}
+  .r-btn.s{background:transparent;color:var(--white);border:2px solid rgba(255,255,255,.35);}
+
+  /* SCORE SCREEN */
+  #scoreScreen{background:radial-gradient(ellipse at center,#1a2744 0%,#0d1627 70%);justify-content:flex-start;}
+  .sc-content{max-width:820px;width:100%;padding:36px 20px;}
+  .sc-title{font-family:'Oswald',sans-serif;font-size:clamp(22px,5vw,38px);color:var(--gold);text-align:center;text-transform:uppercase;letter-spacing:4px;margin-bottom:36px;}
+  .sc-list{display:flex;flex-direction:column;gap:12px;}
+  .sc-item{display:flex;align-items:center;gap:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:16px 22px;transition:all .3s;}
+  .sc-item:hover{border-color:rgba(241,196,15,.3);}
+  .sc-rank{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:rgba(255,255,255,.18);min-width:38px;}
+  .sc-item:nth-child(1) .sc-rank{color:var(--gold);}
+  .sc-item:nth-child(2) .sc-rank{color:#C0C0C0;}
+  .sc-item:nth-child(3) .sc-rank{color:#CD7F32;}
+  .sc-name{flex:1;font-family:'Oswald',sans-serif;font-size:19px;color:var(--white);}
+  .sc-detail{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px;}
+  .sc-bar{width:100%;height:5px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:7px;}
+  .sc-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:3px;transition:width 1s ease;}
+  .sc-pts{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--gold);}
+
+  /* CONFETTI */
+  .confetti{position:fixed;width:10px;height:10px;border-radius:2px;animation:fall linear forwards;z-index:9999;pointer-events:none;}
+  @keyframes fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- PACK REVEAL -->
+<div class="pack-reveal" id="packReveal">
+  <div class="pr-box">
+    <div class="pr-num" id="prNum">1</div>
+    <div class="pr-label">GÓI CÂU HỎI</div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="r-overlay" id="rOverlay">
+  <div class="r-box" id="rBox">
+    <div class="r-icon" id="rIcon">✅</div>
+    <div class="r-title" id="rTitle">CHÍNH XÁC!</div>
+    <div class="r-desc" id="rDesc"></div>
+    <div class="r-answer" id="rAnswer" style="display:none"></div>
+    <div class="r-actions" id="rActions"></div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen active" id="homeScreen">
+  <div class="header" style="width:100%">
+    <div class="stars">★ ★ ★ ★ ★</div>
+    <h1>HỘI THI LỰC LƯỢNG THAM GIA BẢO VỆ AN NINH, TRẬT TỰ Ở CƠ SỞ GIỎI TOÀN QUỐC (LẦN THỨ I) NĂM 2026</h1>
+    <div class="subtitle">BỘ CÔNG AN – PHẦN THI TRẮC NGHIỆM</div>
+  </div>
+  <div class="home-content">
+    <h2>BẢNG ĐIỂM CÁC ĐỘI</h2>
+    <p>
+      Đội chủ: <strong style="color:var(--gold)">+4 điểm/câu đúng</strong> (tối đa 40 điểm) &nbsp;|&nbsp;
+      Đội giành quyền: đúng <strong style="color:var(--green)">+2 điểm</strong> &nbsp;·&nbsp; sai <strong style="color:var(--wrong)">-1 điểm</strong>
+    </p>
+    <div class="teams-grid" id="teamsGrid"></div>
+    <button class="btn-main" onclick="goDraw()">🎲 BỐC THĂM</button>
+    <br>
+    <button class="btn-secondary" onclick="goScore()">📊 Bảng điểm</button>
+    <button class="btn-secondary" onclick="resetAll()" style="margin-left:10px">🔄 Reset</button>
+  </div>
+</div>
+
+<!-- DRAW -->
+<div class="screen" id="drawScreen">
+  <div class="header" style="width:100%">
+    <div class="stars">★ ★ ★</div>
+    <h1>BỐC THĂM GÓI CÂU HỎI</h1>
+  </div>
+  <div class="draw-content">
+    <div class="draw-team-box">
+      <h3 id="drawTeamName">ĐỘI 1</h3>
+      <p id="drawTeamDesc">Vui lòng chọn gói câu hỏi</p>
+    </div>
+    <div class="draw-title">CHỌN GÓI</div>
+    <div class="draw-sub">Đại diện đội thi bấm chọn số gói</div>
+    <div class="packs-grid" id="packsGrid"></div>
+    <button class="btn-secondary" onclick="goHome()">← Quay về</button>
+  </div>
+</div>
+
+<!-- QUESTION -->
+<div class="screen" id="questionScreen">
+  <div class="q-layout">
+    <div class="q-topbar">
+      <div class="q-badges">
+        <div class="badge badge-red" id="qTeamBadge">ĐỘI 1</div>
+        <div class="badge badge-gold" id="qPackBadge">GÓI 1</div>
+        <div class="q-prog" id="qProg">Câu 1/10</div>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-circle hidden-timer" id="timerCircle" style="--pct:100">
+          <div class="timer-num" id="timerNum">5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-body">
+      <div class="q-counter" id="qCounter">CÂU HỎI 1</div>
+      <div class="q-text" id="qText">Nội dung câu hỏi</div>
+      <div class="ans-grid" id="ansGrid"></div>
+      <div class="transfer-panel" id="transferPanel">
+        <div class="tp-title">⚡ CHUYỂN QUYỀN TRẢ LỜI — Chọn đội giành quyền:</div>
+        <div class="tp-teams" id="tpTeams"></div>
+        <div class="tp-bar" id="tpBar"><div class="tp-fill" id="tpFill" style="width:100%"></div></div>
+      </div>
+    </div>
+
+    <div class="q-nav" id="qNav"></div>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div class="screen" id="scoreScreen">
+  <div class="header" style="width:100%">
+    <div class="stars">★ ★ ★ ★ ★</div>
+    <h1>BẢNG ĐIỂM TỔNG KẾT</h1>
+  </div>
+  <div class="sc-content">
+    <div class="sc-list" id="scList"></div>
+    <div style="text-align:center;margin-top:28px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-main" onclick="goHome()">← Về trang chính</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_PACKS = [
+  // ======= GÓI 1 =======
+  [
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được kiện toàn từ những lực lượng nào?", opts: ["a. Kiện toàn từ lực lượng bảo vệ dân phố, Công an xã bán chuyên trách và Đội trưởng, Đội phó đội dân phòng.", "b. Kiện toàn từ lực lượng bảo vệ dân phố, Công an xã bán chuyên trách và dân phòng.", "c. Kiện toàn từ lực lượng bảo vệ dân phố, Công an xã bán chuyên trách và Dân quân tự vệ.", "d. Kiện toàn từ lực lượng bảo vệ dân phố, Công an xã và Đội trưởng, Đội phó đội dân phòng."], ans: 0 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở trực tiếp hỗ trợ cơ quan nào?", opts: ["a. Uỷ ban nhân dân cấp tỉnh.", "b. Công an cấp xã.", "c. Quân đội nhân dân.", "d. Tòa án nhân dân."], ans: 1 },
+    { q: "Cơ quan nào sau đây có thẩm quyền ban hành quyết định thành lập Tổ bảo vệ an ninh, trật tự?", opts: ["a. Chủ tịch Uỷ ban nhân dân cấp xã.", "b. Đảng ủy cấp xã.", "c. Công an cấp xã.", "d. Hội đồng nhân dân cấp xã."], ans: 0 },
+    { q: "Phương châm 'bốn tại chỗ' trong bảo đảm an ninh, trật tự tại cơ sở gồm những nội dung nào?", opts: ["a. Chỉ huy tại chỗ, lực lượng tại chỗ, phương tiện tại chỗ, hậu cần tại chỗ.", "b. Chỉ huy tại chỗ, nguồn lực tại chỗ, con người tại chỗ, hậu cần tại chỗ.", "c. Lãnh đạo tại chỗ, lực lượng tại chỗ, nguồn lực tại chỗ, hậu cần tại chỗ.", "d. Lãnh đạo tại chỗ, nguồn lực tại chỗ, con người tại chỗ, hậu cần tại chỗ."], ans: 0 },
+    { q: "Luật Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được thông qua vào ngày, tháng, năm nào?", opts: ["a. Ngày 25/11/2023.", "b. Ngày 26/11/2023.", "c. Ngày 27/11/2023.", "d. Ngày 28/11/2023."], ans: 3 },
+    { q: "Luật Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở có hiệu lực thi hành khi nào?", opts: ["a. Ngày 01/6/2024.", "b. Ngày 01/7/2024.", "c. Ngày 01/8/2024.", "d. Ngày 01/9/2024."], ans: 1 },
+    { q: "Nắm tình hình về an ninh, trật tự của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở có vai trò nào?", opts: ["a. Giúp chủ động phòng ngừa, phát hiện, hóa giải nguyên nhân tội phạm.", "b. Góp phần nâng cao hiệu quả nhiệm vụ bảo đảm an ninh, trật tự.", "c. Cung cấp thông tin để Công an cấp xã tham mưu với cấp ủy, chính quyền.", "d. Cả 3 đáp án trên."], ans: 3 },
+    { q: "Khi phát hiện vụ tai nạn giao thông, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần thực hiện bước nào trước tiên?", opts: ["a. Lập biên bản hiện trường.", "b. Bảo vệ hiện trường và cấp cứu người bị nạn.", "c. Gọi báo chí.", "d. Tự di chuyển phương tiện bị nạn."], ans: 1 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở hỗ trợ lực lượng nào trong công tác phòng cháy, chữa cháy và cứu nạn, cứu hộ?", opts: ["a. Cảnh sát giao thông.", "b. Dân quân tự vệ.", "c. Lực lượng dân phòng.", "d. Bảo vệ dân phố."], ans: 2 },
+    { q: "Chức danh có thẩm quyền áp dụng biện pháp giáo dục tại xã, phường, đặc khu?", opts: ["a. Cảnh sát khu vực.", "b. Trưởng Công an cấp xã.", "c. Chủ tịch uỷ ban nhân dân cấp xã.", "d. Giám đốc Công an cấp tỉnh."], ans: 2 }
+  ],
+  // ======= GÓI 2 =======
+  [
+    { q: "Cơ quan nào ở địa phương trực tiếp giúp Ủy ban nhân dân cấp xã quản lý, chỉ đạo hoạt động của Tổ bảo vệ an ninh, trật tự?", opts: ["a. Đảng ủy cấp xã.", "b. Công an cấp xã.", "c. Uỷ ban Mặt trận Tổ quốc Việt Nam cấp xã.", "d. Ban Chỉ huy quân sự cấp xã."], ans: 1 },
+    { q: "Nhiệm vụ nào là nhiệm vụ của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở theo quy định của Luật?", opts: ["a. Xét xử tội phạm.", "b. Điều tra hình sự.", "c. Hỗ trợ Công an cấp xã bảo đảm an ninh, trật tự.", "d. Truy tố tội phạm."], ans: 2 },
+    { q: "Ưu thế nổi bật của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở trong bảo vệ an ninh, trật tự tại cơ sở?", opts: ["a. Có quyền cưỡng chế mạnh.", "b. Am hiểu địa bàn, gần dân.", "c. Có vũ khí chuyên dụng.", "d. Tất cả các phương án trên."], ans: 1 },
+    { q: "Yêu cầu đúng nhất về tư tưởng chính trị đối với lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở là gì?", opts: ["a. Có lối sống trong sáng, hòa đồng.", "b. Trung thành với Đảng, Tổ quốc, Nhân dân.", "c. Có kỹ năng giao tiếp, kỹ năng xử lý tình huống.", "d. Tất cả các phương án trên."], ans: 1 },
+    { q: "Đâu không phải là nguyên tắc hoạt động của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Tuân thủ Hiến pháp và pháp luật; bảo vệ quyền con người, quyền công dân.", "b. Chịu sự lãnh đạo của cấp ủy Đảng và sự quản lý của Ủy ban nhân dân cấp xã.", "c. Đáp ứng yêu cầu bảo vệ an ninh, trật tự; phù hợp điều kiện kinh tế - xã hội.", "d. Tuân thủ quy định của Luật Công an nhân dân và các văn bản liên quan."], ans: 3 },
+    { q: "Vị trí, chức năng của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở theo Luật?", opts: ["a. Lực lượng do chính quyền địa phương thành lập trên cơ sở tự nguyện để hỗ trợ Công an xã.", "b. Lực lượng quần chúng được bố trí ở thôn, tổ dân phố, làm nòng cốt hỗ trợ Công an cấp xã.", "c. Lực lượng quần chúng tự nguyện hoạt động tại thôn, tổ dân phố, phường, xã.", "d. Lực lượng quần chúng tổ chức tại địa bàn dân cư hỗ trợ cơ quan công an."], ans: 1 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở hỗ trợ Công an cấp xã nắm tình hình vi phạm pháp luật về những nội dung gì?", opts: ["a. Vi phạm về an ninh, trật tự, phòng cháy, chữa cháy.", "b. Vi phạm về thiên tai, dịch bệnh.", "c. Vi phạm về an ninh, trật tự, tệ nạn xã hội, bạo lực gia đình trên địa bàn phụ trách.", "d. Vi phạm về trật tự, an toàn giao thông."], ans: 2 },
+    { q: "Các yếu tố chính của phong trào toàn dân bảo vệ an ninh Tổ quốc?", opts: ["a. Tự giác, tự nguyện trên cơ sở sự tham gia đông đảo của Nhân dân.", "b. Phát huy sự tự giác, tự nguyện của đông đảo Nhân dân.", "c. Tự giác, có tổ chức và sự tham gia đông đảo của Nhân dân.", "d. Sự tổ chức của các cơ quan chuyên môn quy tụ đông đảo Nhân dân tham gia."], ans: 2 },
+    { q: "Nguyên tắc quan trọng nhất trong hoạt động phòng cháy, chữa cháy và cứu nạn, cứu hộ là gì?", opts: ["a. Chỉ tập trung chữa cháy khi có sự cố xảy ra.", "b. Lấy phòng ngừa là chính, chủ động hạn chế đám cháy và thiệt hại.", "c. Chỉ sử dụng lực lượng chuyên nghiệp để xử lý cháy.", "d. Không cần chuẩn bị phương tiện trước khi xảy ra cháy."], ans: 1 },
+    { q: "Nhiệm vụ chính của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở trong hỗ trợ bảo đảm trật tự, an toàn giao thông?", opts: ["a. Xử phạt vi phạm hành chính.", "b. Hỗ trợ tham gia bảo đảm trật tự, an toàn giao thông.", "c. Cấp giấy phép lái xe.", "d. Đăng kiểm phương tiện."], ans: 1 }
+  ],
+  // ======= GÓI 3 =======
+  [
+    { q: "Quan điểm xây dựng lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần phù hợp với những đặc thù gì tại địa phương?", opts: ["a. Quy mô dân số, diện tích.", "b. Điều kiện kinh tế - xã hội.", "c. Tình hình, yêu cầu bảo đảm an ninh, trật tự.", "d. Tất cả các phương án trên."], ans: 3 },
+    { q: "Trong quan điểm chỉ đạo về xây dựng lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở, Nhân dân có vai trò như thế nào?", opts: ["a. Đối tượng quản lý.", "b. Trung tâm, chủ thể, mục tiêu và động lực.", "c. Lực lượng hỗ trợ.", "d. Tất cả các phương án trên."], ans: 1 },
+    { q: "Quan hệ công tác của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở với trưởng thôn, Tổ trưởng tổ dân phố là gì?", opts: ["a. Phối hợp.", "b. Phục tùng, chấp hành.", "c. Hỗ trợ.", "d. Chỉ đạo, điều hành."], ans: 0 },
+    { q: "Quan điểm 'an ninh chủ động' theo tinh thần Đại hội Đảng khóa XIV đặt ra yêu cầu gì đối với lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Chủ động nắm tình hình.", "b. Chủ động xử lý kịp thời các vấn đề phức tạp về trật tự, an toàn xã hội.", "c. Chủ động chuẩn bị nguồn lực.", "d. Tất cả các phương án trên."], ans: 3 },
+    { q: "Tiêu chuẩn đạo đức để tham gia lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được quy định như thế nào?", opts: ["a. Phẩm chất đạo đức xuất sắc.", "b. Phẩm chất đạo đức giỏi.", "c. Phẩm chất đạo đức tốt.", "d. Tất cả các phương án trên."], ans: 2 },
+    { q: "Mục tiêu nắm tình hình an ninh, trật tự của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở là?", opts: ["a. Phát hiện và xử lý vi phạm hành chính.", "b. Kịp thời nắm bắt các thông tin, tài liệu có liên quan đến công tác bảo đảm an ninh, trật tự.", "c. Thu thập thông tin phục vụ phát triển kinh tế - xã hội.", "d. Quản lý nhân khẩu."], ans: 1 },
+    { q: "Nội dung nào không thuộc nhiệm vụ tuyên truyền của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Vận động giao nộp vũ khí, vật liệu nổ trái phép.", "b. Phổ biến kiến thức về phòng, chống bạo lực gia đình.", "c. Vận động người dân tham gia phòng cháy, chữa cháy.", "d. Tuyên truyền về việc lựa chọn ứng cử viên đại biểu Quốc hội."], ans: 3 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần làm gì trong việc hỗ trợ xây dựng phong trào tại khu dân cư?", opts: ["a. Đứng ra thành lập các hội, nhóm để người dân tham gia.", "b. Là lực lượng nòng cốt, trực tiếp tuyên truyền, vận động nhân dân chấp hành pháp luật và bảo vệ an ninh, trật tự.", "c. Chỉ tham gia khi có yêu cầu, kế hoạch của lực lượng Công an chính quy.", "d. Thay mặt chính quyền giải quyết các vụ án hình sự."], ans: 1 },
+    { q: "Trong các hoạt động sau, đâu là nhiệm vụ hỗ trợ Công an cấp xã quản lý hành chính về trật tự xã hội?", opts: ["a. Tự ý xử phạt hành chính người vi phạm.", "b. Hỗ trợ ghi chép thông tin theo giấy tờ do công dân cung cấp.", "c. Tự ý tạm giữ người không có giấy tờ.", "d. Ban hành quyết định xử lý vi phạm."], ans: 1 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần làm gì khi chứng kiến vụ va chạm giao thông giữa 02 phương tiện?", opts: ["a. Mặc kệ để các bên tự giải quyết.", "b. Hỗ trợ các bên hòa giải nhanh chóng tránh gây ùn tắc và báo ngay Công an cấp xã.", "c. Bỏ đi.", "d. Ghi chụp lại hình ảnh."], ans: 1 }
+  ],
+  // ======= GÓI 4 =======
+  [
+    { q: "Quan điểm xây dựng lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở gắn bó với xây dựng thế trận lòng dân có ý nghĩa như thế nào?", opts: ["a. Tăng cường tiềm lực quân sự.", "b. Tạo niềm tin, tăng cường sự đồng thuận xã hội.", "c. Tăng quyền lực hành chính.", "d. Tăng kiểm soát xã hội."], ans: 1 },
+    { q: "Quan điểm 'an ninh kiến tạo' theo tinh thần Đại hội Đảng khóa XIV nhấn mạnh yêu cầu gì?", opts: ["a. Chuyển hóa thách thức thành cơ hội cho phát triển đất nước.", "b. Tạo động lực trực tiếp và thuận lợi cao nhất cho phát triển kinh tế - xã hội.", "c. Chủ động nhận diện, tranh thủ tối đa thời cơ.", "d. Tất cả các phương án trên."], ans: 3 },
+    { q: "Theo tinh thần Đại hội XIV của Đảng, tự chủ chiến lược về an ninh gồm những nội dung gì?", opts: ["a. Chủ động nhận diện, ngăn ngừa, đẩy lùi từ sớm, từ xa các nguy cơ.", "b. Chủ động chuẩn bị nguồn lực quốc gia.", "c. Chăm lo xây dựng thế trận lòng dân.", "d. Tất cả các phương án trên."], ans: 3 },
+    { q: "Yêu cầu của việc tuyển chọn Tổ viên Tổ bảo vệ an ninh, trật tự?", opts: ["a. Bảo đảm công bằng, minh bạch, thực hiện quyền, nghĩa vụ của công dân.", "b. Bảo đảm công khai, dân chủ, đúng quy định của pháp luật.", "c. Bảo đảm bí mật, an toàn, theo yêu cầu của các cơ quan chuyên môn.", "d. Tất cả các phương án trên."], ans: 1 },
+    { q: "Thẩm quyền cho thôi tham gia lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở là ai?", opts: ["a. Bí thư Đảng uỷ cấp xã.", "b. Trưởng Công an cấp xã.", "c. Chủ tịch Ủy ban nhân dân cấp xã.", "d. Giám đốc Công an cấp tỉnh."], ans: 2 },
+    { q: "Khi phát hiện, tiếp nhận thông tin vi phạm pháp luật về an ninh, trật tự trên địa bàn, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần phải làm gì?", opts: ["a. Báo ngay cho Công an cấp xã; có mặt tại nơi xảy ra vụ việc; kịp thời ngăn chặn hành vi xâm phạm.", "b. Kêu gọi những người xung quanh hỗ trợ, giúp đỡ.", "c. Báo cáo Chủ tịch Uỷ ban nhân dân cấp xã để có hướng xử lý.", "d. Vận động quần chúng nhân dân tham gia giải quyết vụ việc."], ans: 0 },
+    { q: "Công tác tuyên truyền 'Gương người tốt, việc tốt' trong lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở có tác dụng gì?", opts: ["a. Nhằm lan tỏa hành động tích cực, tạo động lực học tập, làm theo, nâng cao ý thức Nhân dân.", "b. Để quảng bá thành tích cá nhân.", "c. Nhằm đánh giá, xếp loại kết quả hoạt động của tập thể, cá nhân.", "d. Để gây áp lực cho những người khác."], ans: 0 },
+    { q: "Quy định nào chính xác nhất về địa bàn mà lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở hỗ trợ phòng cháy, chữa cháy?", opts: ["a. Địa bàn là khu vực dân cư nơi cư trú.", "b. Địa bàn phụ trách hoặc địa bàn khác khi được điều động.", "c. Địa bàn theo hướng dẫn của Công an cấp xã.", "d. Địa bàn nào xảy ra cháy, nổ, sự cố, tai nạn."], ans: 1 },
+    { q: "Nếu công dân không chấp hành việc về trụ sở Công an để xác minh, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần làm gì?", opts: ["a. Để công dân rời đi.", "b. Tự ý áp dụng biện pháp cưỡng chế.", "c. Hỗ trợ cán bộ Công an cấp xã yêu cầu công dân về trụ sở để xác minh.", "d. Lập biên bản xử phạt ngay."], ans: 2 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần nắm những thông tin gì về người đã có hành vi vi phạm pháp luật đang cư trú ở cơ sở?", opts: ["a. Số lượng, biến động tăng giảm.", "b. Biết mặt, biết tên, tuổi, đặc điểm tâm lý, hoàn cảnh cư trú.", "c. Số lượng, biến động tăng giảm; biết mặt, biết tên, tuổi, đặc điểm tâm lý, hoàn cảnh cư trú.", "d. Số lượng, biến động tăng giảm; biết mặt, biết tên, tuổi, đặc điểm tâm lý, hoàn cảnh cư trú, lai lịch nhân thân."], ans: 3 }
+  ],
+  // ======= GÓI 5 =======
+  [
+    { q: "Các tư duy, phương pháp bảo vệ an ninh quốc gia trong kỷ nguyên mới?", opts: ["a. An ninh chủ động.", "b. An ninh bao trùm.", "c. Kỷ luật thực thi.", "d. Tất cả các phương án trên."], ans: 3 },
+    { q: "Phát biểu tại Hội nghị sơ kết 01 năm lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở ngày 12/11/2025, Thủ tướng tặng 14 chữ nào?", opts: ["a. 'Mưu trí; Trung thành; tận tụy; đoàn kết; kỷ cương; trách nhiệm; hiệu quả'.", "b. 'Bản lĩnh; mưu trí; dũng cảm; mắt sáng, tai thính; nhân văn; vì dân'.", "c. 'Chủ động; linh hoạt; kiên quyết; khôn khéo; gần dân; sát dân'.", "d. 'Đoàn kết; dân chủ; kỷ luật; trách nhiệm; sáng tạo; phát triển; nhân văn'."], ans: 1 },
+    { q: "Báo cáo chính trị Đại hội XIV nêu xây dựng lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở như thế nào?", opts: ["a. Chính quy, tinh nhuệ.", "b. Chuyên nghiệp.", "c. Vững mạnh.", "d. Kỷ cương, trách nhiệm."], ans: 2 },
+    { q: "Theo Chương trình hành động của Ban chấp hành Trung ương, xây dựng lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở theo định hướng nào?", opts: ["a. Chính quy, tinh nhuệ, từng bước hiện đại.", "b. Vững mạnh, rộng khắp.", "c. Đoàn kết, kỷ cương, trách nhiệm.", "d. Chủ động, linh hoạt, hiệu quả."], ans: 1 },
+    { q: "Theo quy định hiện hành, ai là người có thẩm quyền công nhận Tổ trưởng, Tổ phó Tổ bảo vệ an ninh, trật tự?", opts: ["a. Trưởng Công an cấp xã.", "b. Chủ tịch Ủy ban nhân dân cấp xã.", "c. Tổ trưởng tổ dân phố.", "d. Trưởng thôn."], ans: 1 },
+    { q: "Nguồn thông tin quan trọng, trực tiếp và thường xuyên nhất trong nắm tình hình an ninh, trật tự ở cơ sở là?", opts: ["a. Báo chí.", "b. Nhân dân tại địa bàn.", "c. Internet.", "d. Hồ sơ lưu trữ."], ans: 1 },
+    { q: "Phương châm nào sau đây là chính xác nhất khi tham gia thực hiện xây dựng phong trào toàn dân bảo vệ an ninh Tổ quốc?", opts: ["a. 'Dân biết, dân bàn, dân làm, dân kiểm tra'.", "b. 'Dân biết, dân bàn, dân làm, dân kiểm tra, dân giám sát, dân thụ hưởng'.", "c. 'Dân biết, dân bàn, dân làm, dân kiểm tra, dân giám sát, dân hưởng thụ'.", "d. 'Lúc dân cần, lúc dân khó có Công an'."], ans: 1 },
+    { q: "Đâu không phải là mô hình trong phong trào toàn dân bảo vệ an ninh Tổ quốc?", opts: ["a. Xã không ma túy.", "b. Bản làng không ma túy.", "c. Xã không có tội phạm ma túy.", "d. Thế giới không ma túy."], ans: 3 },
+    { q: "Nội dung hỗ trợ Công an cấp xã trong kiểm tra an toàn phòng cháy, chữa cháy tại thôn, tổ dân phố bao gồm những vấn đề gì?", opts: ["a. Kiểm tra thu nhập hộ gia đình.", "b. Kiểm tra việc sử dụng điện, nguồn lửa.", "c. Kiểm tra nhân khẩu.", "d. Kiểm tra hộ khẩu."], ans: 1 },
+    { q: "Các hình thức tiến hành tuyên truyền, vận động của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở đối với người đã có hành vi vi phạm pháp luật?", opts: ["a. Tuyên truyền, vận động cá biệt.", "b. Tuyên truyền, vận động tập trung.", "c. Tuyên truyền, vận động rộng rãi.", "d. Tất cả các đáp án trên."], ans: 3 }
+  ],
+  // ======= GÓI 6 =======
+  [
+    { q: "Đâu không phải là hành vi bị nghiêm cấm theo quy định của Luật Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Làm lộ bí mật nhà nước, bí mật công tác, thông tin về an ninh, trật tự.", "b. Lợi dụng nhiệm vụ bảo vệ an ninh để nhũng nhiễu, xâm phạm lợi ích của tổ chức, cá nhân.", "c. Giả danh lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở.", "d. Xúc phạm, đe dọa, cản trở lực lượng khi thực hiện nhiệm vụ."], ans: 0 },
+    { q: "Đâu không phải là nhiệm vụ của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Hỗ trợ xây dựng phong trào toàn dân bảo vệ an ninh Tổ quốc.", "b. Hỗ trợ phòng cháy, chữa cháy, cứu nạn, cứu hộ.", "c. Hỗ trợ quản lý hành chính về trật tự xã hội.", "d. Hỗ trợ hỏi cung bị can."], ans: 3 },
+    { q: "Giấy tờ nào không thuộc thành phần hồ sơ tuyển chọn lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Đơn đề nghị tham gia lực lượng.", "b. Chứng nhận của cơ sở khám bệnh về việc có đủ sức khỏe.", "c. Thẻ căn cước, giấy phép lái xe, hộ chiếu (nếu có).", "d. Bản khai sơ yếu lý lịch."], ans: 2 },
+    { q: "Độ tuổi tham gia lực lượng bảo vệ an ninh, trật tự ở cơ sở theo quy định của Luật?", opts: ["a. Từ đủ 18 tuổi đến đủ 70 tuổi.", "b. Từ đủ 18 tuổi đến đủ 65 tuổi.", "c. Từ đủ 18 tuổi đến đủ 60 tuổi.", "d. Từ đủ 18 tuổi đến đủ 70 tuổi; trường hợp trên 70 tuổi mà bảo đảm sức khỏe thì Chủ tịch UBND cấp xã xem xét, quyết định."], ans: 3 },
+    { q: "Địa bàn phụ trách của Tổ bảo vệ an ninh, trật tự theo quy định của Luật?", opts: ["a. Là một hoặc một số thôn, tổ dân phố thuộc đơn vị hành chính cấp xã.", "b. Là một số địa bàn cơ sở thuộc đơn vị hành chính cấp xã.", "c. Là một số thôn, ấp thuộc địa bàn hành chính xã.", "d. Là các khu vực dân cư, thôn, tổ dân phố thuộc địa giới hành chính của xã, phường, đặc khu."], ans: 0 },
+    { q: "Cơ quan có thẩm quyền quyết định số lượng Tổ bảo vệ an ninh, trật tự cần thành lập?", opts: ["a. Bộ trưởng Bộ Công an.", "b. Uỷ ban nhân dân cấp tỉnh.", "c. Hội đồng nhân dân cấp tỉnh.", "d. Uỷ ban nhân dân cấp xã."], ans: 1 },
+    { q: "Cơ quan có thẩm quyền quy định tiêu chí thành lập Tổ bảo vệ an ninh, trật tự?", opts: ["a. Bộ trưởng Bộ Công an.", "b. Uỷ ban nhân dân cấp tỉnh.", "c. Hội đồng nhân dân cấp tỉnh.", "d. Uỷ ban nhân dân cấp xã."], ans: 2 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được trang bị những loại công cụ hỗ trợ nào?", opts: ["a. Dùi cui, áo giáp chống đâm, găng tay bắt dao.", "b. Dùi cui cao su, dùi cui kim loại, áo giáp chống đâm, găng tay bắt dao.", "c. Súng, dùi cui kim loại, áo giáp chống đâm, găng tay bắt dao.", "d. Tất cả các phương án trên."], ans: 1 },
+    { q: "Khi được giao nhiệm vụ hỗ trợ điều tiết giao thông, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần tuân thủ nguyên tắc nào?", opts: ["a. Tùy tình huống cá nhân.", "b. Thực hiện theo cảm tính.", "c. Theo hướng dẫn, phân công của lực lượng Công an.", "d. Theo yêu cầu người dân."], ans: 2 },
+    { q: "Quan hệ công tác của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở trong hỗ trợ vận động, giáo dục người đã có hành vi vi phạm pháp luật được quy định như thế nào?", opts: ["a. Chịu lãnh đạo toàn diện của đảng ủy cấp xã.", "b. Sự giám sát của HĐND cấp xã, sự quản lý, điều hành của UBND cấp xã.", "c. Sự chỉ đạo, hướng dẫn về chuyên môn nghiệp vụ của Công an cấp xã.", "d. Tất cả các đáp án trên."], ans: 3 }
+  ],
+  // ======= GÓI 7 =======
+  [
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được hưởng những chế độ, chính sách gì?", opts: ["a. Được hưởng tiền hỗ trợ thường xuyên hằng tháng, hỗ trợ đóng BHXH tự nguyện, BHYT theo mức do HĐND cấp tỉnh quyết định.", "b. Được hưởng lương hàng tháng, hỗ trợ đóng BHXH tự nguyện, BHYT theo mức do HĐND cấp tỉnh quyết định.", "c. Được hưởng tiền hỗ trợ hằng tháng, hỗ trợ đóng BHXH tự nguyện, BHYT theo mức do Bộ Công an quyết định.", "d. Được hưởng tiền hỗ trợ hằng tháng, hỗ trợ đóng BHXH tự nguyện, BHYT theo mức do UBND cấp tỉnh quyết định."], ans: 0 },
+    { q: "Đâu không phải là trường hợp cho thôi tham gia lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở theo quy định của Luật?", opts: ["a. Có đơn xin thôi tham gia.", "b. Không bảo đảm sức khỏe theo giấy chứng nhận của cơ sở khám bệnh.", "c. Không chấp hành nhiệm vụ từ 01 lần mà không có lý do chính đáng và đã bị nhắc nhở bằng văn bản từ 01 lần.", "d. Vi phạm pháp luật hình sự đã có quyết định khởi tố bị can hoặc bị áp dụng biện pháp ngăn chặn."], ans: 2 },
+    { q: "Tổ chức của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được bố trí như thế nào?", opts: ["a. Lực lượng được bố trí thành Tổ bảo vệ an ninh, trật tự.", "b. Lực lượng được bố trí thành Tổ An ninh, trật tự.", "c. Lực lượng được bố trí thành Tổ bảo đảm an ninh, trật tự.", "d. Lực lượng được bố trí thành Cụm bảo vệ an ninh, trật tự."], ans: 0 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được huấn luyện, bồi dưỡng về chính trị, pháp luật, nghiệp vụ theo quy định của cơ quan nào?", opts: ["a. Ủy ban nhân dân cấp xã.", "b. Ủy ban nhân dân cấp tỉnh.", "c. Mặt trận Tổ quốc Việt Nam.", "d. Bộ Công an."], ans: 3 },
+    { q: "Trường hợp nào cần điều chỉnh số lượng thành viên, số lượng Tổ bảo vệ an ninh, trật tự?", opts: ["a. Do sáp nhập đơn vị hành chính cấp xã.", "b. Do yêu cầu bảo đảm an ninh, quốc phòng tại địa phương.", "c. Do yêu cầu bảo đảm an ninh, trật tự hoặc thành lập, giải thể, nhập, chia thôn, tổ dân phố.", "d. Do yêu cầu của Công an cấp xã."], ans: 2 },
+    { q: "Trong các yêu cầu sau, đâu là yêu cầu không đúng trong nắm tình hình về an ninh, trật tự của lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Chính xác, cụ thể.", "b. Thường xuyên, liên tục, kịp thời.", "c. Bí mật.", "d. Có trọng tâm, trọng điểm."], ans: 2 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở thu thập thông tin, nắm tình hình theo các nội dung trọng tâm nào?", opts: ["a. Đặc điểm địa lý, dân cư trên địa bàn để hỗ trợ công tác bảo đảm an ninh, trật tự.", "b. Tình hình thực hiện phong trào toàn dân bảo vệ an ninh Tổ quốc trên địa bàn.", "c. Thông tin, tình hình phục vụ công tác quản lý hành chính về trật tự, xã hội trên địa bàn.", "d. Tất cả các nội dung trên."], ans: 3 },
+    { q: "Người tham gia lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở chưa tham gia bảo hiểm y tế không được hưởng chi phí khám bệnh, chữa bệnh trong trường hợp nào?", opts: ["a. Bị ốm đau.", "b. Bị tai nạn.", "c. Tai nạn do sử dụng rượu, bia, chất ma túy hoặc chất gây nghiện khác.", "d. Bị thương."], ans: 2 },
+    { q: "Công dân được xét tuyển để đề nghị công nhận là Tổ viên Tổ bảo vệ an ninh, trật tự khi được bao nhiêu phần trăm thành viên Hội đồng xét tuyển nhất trí?", opts: ["a. 20%", "b. 50%", "c. Trên 50%", "d. 30%"], ans: 2 },
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở có bao nhiêu nhóm nhiệm vụ theo quy định tại Luật?", opts: ["a. 5 nhóm nhiệm vụ.", "b. 6 nhóm nhiệm vụ.", "c. 7 nhóm nhiệm vụ.", "d. 8 nhóm nhiệm vụ."], ans: 1 }
+  ],
+  // ======= GÓI 8 =======
+  [
+    { q: "Lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở được chỉ được sử dụng biển hiệu, giấy chứng nhận khi nào?", opts: ["a. Khi tham gia lao động sản xuất.", "b. Khi thực hiện nhiệm vụ.", "c. Khi tham gia biểu diễn văn hóa, văn nghệ.", "d. Tất cả trường hợp trên."], ans: 1 },
+    { q: "Áo giáp chống đâm có thể được trang bị theo tỷ lệ bao nhiêu phần trăm quân số của 01 Tổ bảo vệ an ninh, trật tự?", opts: ["a. 100% quân số.", "b. 70% quân số.", "c. 50% quân số.", "d. 30% quân số."], ans: 3 },
+    { q: "Dùi cui kim loại có thể được trang bị theo tỷ lệ bao nhiêu phần trăm quân số của 01 Tổ bảo vệ an ninh, trật tự?", opts: ["a. 90% quân số.", "b. 70% quân số.", "c. 50% quân số.", "d. 30% quân số."], ans: 2 },
+    { q: "Đâu là thiết bị nằm trong danh mục phương tiện, thiết bị cho lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Giường cá nhân.", "b. Tủ đựng tài liệu, đựng công cụ hỗ trợ và phục vụ công việc.", "c. Bàn làm việc cá nhân.", "d. Cả 3 loại thiết bị trên."], ans: 3 },
+    { q: "Theo quy định của Luật Quản lý, sử dụng vũ khí, vật liệu nổ và công cụ hỗ trợ, có bao nhiêu nguyên tắc quản lý, sử dụng?", opts: ["a. 6 nguyên tắc.", "b. 7 nguyên tắc.", "c. 8 nguyên tắc.", "d. 9 nguyên tắc."], ans: 3 },
+    { q: "Loại nào sau đây không phải là công cụ hỗ trợ được trang bị cho lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở?", opts: ["a. Dùi cui cao su.", "b. Dùi cui kim loại.", "c. Áo giáp chống đâm.", "d. Dùi cui điện."], ans: 3 },
+    { q: "Người được giao sử dụng công cụ hỗ trợ cần đáp ứng yêu cầu nào về đào tạo?", opts: ["a. Không cần đào tạo.", "b. Đã qua đào tạo, huấn luyện và được cấp chứng nhận.", "c. Tự học là đủ.", "d. Chỉ cần hướng dẫn miệng."], ans: 1 },
+    { q: "Đối với trường hợp bạo lực gia đình, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần nắm những thông tin gì?", opts: ["a. Thông tin về người có hành vi bạo lực gia đình, thông tin về nạn nhân.", "b. Các hành vi bạo lực gia đình mà đối tượng đã và đang thực hiện.", "c. Dư luận quần chúng trên địa bàn về vấn đề bạo lực gia đình.", "d. Tất cả các đáp án trên."], ans: 3 },
+    { q: "Khi gặp ùn tắc giao thông xảy ra trên địa bàn, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở cần làm gì?", opts: ["a. Đứng nhìn.", "b. Tự ý phân luồng tùy ý.", "c. Hỗ trợ phân luồng theo hướng dẫn của lực lượng Công an.", "d. Rời khỏi hiện trường."], ans: 2 },
+    { q: "Khi làm nhiệm vụ hỗ trợ bảo đảm trật tự, an toàn giao thông, lực lượng tham gia bảo vệ an ninh, trật tự ở cơ sở không được làm gì?", opts: ["a. Hỗ trợ điều tiết giao thông.", "b. Báo cáo lực lượng chức năng.", "c. Tự ý dừng xe và kiểm tra giấy tờ liên quan đến phương tiện vi phạm.", "d. Hướng dẫn người tham gia giao thông."], ans: 2 }
+  ]
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let teams = Array.from({length:8},(_,i)=>({id:i+1,name:`ĐỘI ${i+1}`,score:0,correct:0,bonus:0,penalty:0}));
+let packUsed = Array(8).fill(false);
+let currentTeamIdx = 0;
+let currentPack = null;
+let currentQIdx = 0;
+let qResults = [];       // null | 'correct' | 'wrong' | 'skip'
+let isTransfer = false;
+let transferTeam = null;
+let timer5 = null;
+let timer5Sec = 5;
+let answerLocked = false;
+
+// ============================================================
+// AUDIO
+// ============================================================
+let actx = null;
+function initAudio(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();}
+function playTone(f,d,type='sine',v=0.3){try{initAudio();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+d);o.start();o.stop(actx.currentTime+d);}catch(e){}}
+function sndCorrect(){playTone(523,.13);setTimeout(()=>playTone(659,.13),140);setTimeout(()=>playTone(784,.28),280);}
+function sndWrong(){playTone(200,.3,'sawtooth',.2);}
+function sndTick(){playTone(880,.05,'square',.1);}
+function sndUrgent(){playTone(440,.1,'square',.15);}
+
+// ============================================================
+// SCREENS
+// ============================================================
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){renderHome();show('homeScreen');}
+function goScore(){renderScore();show('scoreScreen');}
+
+function goDraw(){
+  const played=packUsed.filter(Boolean).length;
+  if(played>=8){alert('Tất cả 8 gói câu hỏi đã sử dụng!');return;}
+  currentTeamIdx=played;
+  renderDraw();
+  show('drawScreen');
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function renderHome(){
+  document.getElementById('teamsGrid').innerHTML=teams.map(t=>`
+    <div class="team-card">
+      <div class="t-num">ĐỘI ${t.id}</div>
+      <div class="t-score">${t.score}</div>
+      <div class="t-detail">${t.correct}✓ đúng · +${t.bonus}⭐ thưởng · -${t.penalty}⚠ trừ</div>
+    </div>`).join('');
+}
+
+// ============================================================
+// DRAW
+// ============================================================
+function renderDraw(){
+  document.getElementById('drawTeamName').textContent=teams[currentTeamIdx].name;
+  document.getElementById('drawTeamDesc').textContent=`Lượt bốc thăm thứ ${currentTeamIdx+1}/8 — Chọn gói câu hỏi`;
+  document.getElementById('packsGrid').innerHTML=Array.from({length:8},(_,i)=>`
+    <button class="pack-btn${packUsed[i]?' used':''}" ${packUsed[i]?'disabled':''} onclick="selectPack(${i})">
+      <div class="pack-num">${i+1}</div>
+      <div class="pack-label">Gói ${i+1}</div>
+    </button>`).join('');
+}
+
+function selectPack(idx){
+  if(packUsed[idx])return;
+  document.querySelectorAll('.pack-btn').forEach((b,i)=>{if(i===idx)b.classList.add('chosen');});
+  currentPack=idx;
+  showPackReveal(idx+1,()=>{packUsed[idx]=true;startQuestions();});
+}
+
+function showPackReveal(num,cb){
+  const el=document.getElementById('packReveal');
+  document.getElementById('prNum').textContent=num;
+  el.classList.add('show');
+  playTone(440,.1);setTimeout(()=>playTone(554,.1),190);setTimeout(()=>playTone(659,.22),380);
+  setTimeout(()=>{el.classList.remove('show');if(cb)cb();},2200);
+}
+
+// ============================================================
+// QUESTIONS
+// ============================================================
+function startQuestions(){
+  currentQIdx=0;
+  qResults=Array(10).fill(null);
+  isTransfer=false;
+  transferTeam=null;
+  show('questionScreen');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const pack=ALL_PACKS[currentPack];
+  const q=pack[currentQIdx];
+  answerLocked=false;
+  isTransfer=false;
+  transferTeam=null;
+
+  document.getElementById('qTeamBadge').textContent=teams[currentTeamIdx].name;
+  document.getElementById('qPackBadge').textContent=`GÓI ${currentPack+1}`;
+  document.getElementById('qProg').textContent=`Câu ${currentQIdx+1}/10`;
+  document.getElementById('qCounter').textContent=`CÂU HỎI ${currentQIdx+1}`;
+  document.getElementById('qText').textContent=q.q;
+
+  const keys=['A','B','C','D'];
+  document.getElementById('ansGrid').innerHTML=q.opts.map((opt,i)=>`
+    <button class="ans-btn" id="ans${i}" onclick="selectAnswer(${i})">
+      <span class="ans-key">${keys[i]}.</span>
+      <span>${opt.replace(/^[a-d]\.\s*/,'')}</span>
+    </button>`).join('');
+
+  // Hide transfer panel & timer
+  document.getElementById('transferPanel').classList.remove('show');
+  document.getElementById('tpBar').classList.remove('show');
+  hideTimer();
+
+  // Nav dots
+  document.getElementById('qNav').innerHTML=Array.from({length:10},(_,i)=>{
+    let cls='q-dot';
+    if(i===currentQIdx)cls+=' cur';
+    else if(qResults[i]==='correct')cls+=' ok';
+    else if(qResults[i]==='wrong'||qResults[i]==='skip')cls+=' ko';
+    return `<div class="${cls}">${i+1}</div>`;
+  }).join('');
+}
+
+// ============================================================
+// TIMER (only for transfer 5-sec)
+// ============================================================
+function showTimer(sec){
+  const circle=document.getElementById('timerCircle');
+  circle.classList.remove('hidden-timer');
+  timer5Sec=sec;
+  updateTimerUI();
+}
+function hideTimer(){
+  clearTimer5();
+  document.getElementById('timerCircle').classList.add('hidden-timer');
+}
+function updateTimerUI(){
+  const num=document.getElementById('timerNum');
+  const circle=document.getElementById('timerCircle');
+  num.textContent=timer5Sec;
+  num.className='timer-num'+(timer5Sec<=2?' urgent':'');
+  const pct=(timer5Sec/5)*100;
+  circle.style.setProperty('--pct',pct);
+  const col=timer5Sec<=2?'#e74c3c':timer5Sec<=3?'#e67e22':'#f1c40f';
+  circle.style.background=`conic-gradient(${col} calc(${pct}*1%),rgba(255,255,255,.1) 0%)`;
+}
+function clearTimer5(){if(timer5){clearInterval(timer5);timer5=null;}}
+
+function startTimer5(){
+  clearTimer5();
+  showTimer(5);
+  document.getElementById('tpBar').classList.add('show');
+  document.getElementById('tpFill').style.width='100%';
+  timer5=setInterval(()=>{
+    timer5Sec--;
+    if(timer5Sec<=2)sndUrgent();else sndTick();
+    updateTimerUI();
+    const pct=Math.max(0,(timer5Sec/5)*100);
+    document.getElementById('tpFill').style.width=pct+'%';
+    if(timer5Sec<=0){clearTimer5();}
+  },1000);
+}
+
+// ============================================================
+// ANSWER SELECTION
+// ============================================================
+function selectAnswer(idx){
+  if(answerLocked)return;
+  answerLocked=true;
+  clearTimer5();
+
+  const q=ALL_PACKS[currentPack][currentQIdx];
+  const correct=idx===q.ans;
+  const respondingTeam=isTransfer?(transferTeam!==null?transferTeam:currentTeamIdx):currentTeamIdx;
+
+  document.querySelectorAll('.ans-btn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===idx)b.classList.add('selected');
+  });
+
+  if(correct){
+    // Score
+    if(isTransfer){
+      teams[respondingTeam].score+=2;
+      teams[respondingTeam].bonus++;
+    }else{
+      teams[respondingTeam].score+=4;
+      teams[respondingTeam].correct++;
+    }
+    qResults[currentQIdx]='correct';
+    setTimeout(()=>highlightAns(idx,true),200);
+    setTimeout(()=>showResult('correct',respondingTeam),600);
+    sndCorrect();
+    spawnConfetti();
+  }else{
+    sndWrong();
+    setTimeout(()=>highlightAns(idx,false),200);
+    if(!isTransfer){
+      // Main team wrong → open transfer panel
+      qResults[currentQIdx]='wrong';
+      setTimeout(()=>openTransferPanel(),600);
+    }else{
+      // Transfer team wrong → -1 point, show answer
+      if(respondingTeam!==currentTeamIdx){
+        teams[respondingTeam].score=Math.max(0,teams[respondingTeam].score-1);
+        teams[respondingTeam].penalty++;
+      }
+      qResults[currentQIdx]='skip';
+      setTimeout(()=>showResult('answer',currentTeamIdx,null,respondingTeam),600);
+    }
+  }
+}
+
+function highlightAns(idx,correct){
+  const q=ALL_PACKS[currentPack][currentQIdx];
+  document.querySelectorAll('.ans-btn').forEach((b,i)=>{
+    if(correct){if(i===idx)b.classList.add('correct');else b.classList.add('dimmed');}
+    else{if(i===idx)b.classList.add('wrong');}
+  });
+}
+
+// ============================================================
+// TRANSFER
+// ============================================================
+function openTransferPanel(){
+  isTransfer=true;
+  answerLocked=false;
+  // Re-enable answer buttons (reset styling except main team's wrong)
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=false;b.classList.remove('selected','wrong','dimmed');});
+
+  const panel=document.getElementById('transferPanel');
+  panel.classList.add('show');
+
+  document.getElementById('tpTeams').innerHTML=teams.map((t,i)=>{
+    if(i===currentTeamIdx)return '';
+    return `<button class="tp-team-btn" id="tpBtn${i}" onclick="pickTransferTeam(${i})">${t.name}</button>`;
+  }).join('');
+
+  // Update badge
+  document.getElementById('qTeamBadge').className='badge badge-orange';
+  document.getElementById('qTeamBadge').textContent='GIÀNH QUYỀN TRẢ LỜI';
+
+  startTimer5();
+}
+
+function pickTransferTeam(idx){
+  transferTeam=idx;
+  document.querySelectorAll('.tp-team-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById(`tpBtn${idx}`);
+  if(btn)btn.classList.add('active');
+  document.getElementById('qTeamBadge').textContent=teams[idx].name+' (đang trả lời)';
+}
+
+// ============================================================
+// SKIP (no one answers / time up in transfer)
+// ============================================================
+function skipQuestion(){
+  clearTimer5();
+  answerLocked=true;
+  qResults[currentQIdx]='skip';
+  // Highlight correct answer
+  const q=ALL_PACKS[currentPack][currentQIdx];
+  document.querySelectorAll('.ans-btn').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans)b.classList.add('correct');else b.classList.add('dimmed');
+  });
+  showResult('answer',currentTeamIdx,null,null);
+}
+
+// ============================================================
+// RESULT OVERLAY
+// ============================================================
+function showResult(type,teamIdx,extra,penaltyTeamIdx){
+  const overlay=document.getElementById('rOverlay');
+  const box=document.getElementById('rBox');
+  const icon=document.getElementById('rIcon');
+  const title=document.getElementById('rTitle');
+  const desc=document.getElementById('rDesc');
+  const answer=document.getElementById('rAnswer');
+  const actions=document.getElementById('rActions');
+  box.className='r-box';
+  answer.style.display='none';
+  answer.innerHTML='';
+
+  if(type==='correct'){
+    box.classList.add('c-box');
+    icon.textContent='🎉';
+    title.className='r-title green';title.textContent='CHÍNH XÁC!';
+    const pts=isTransfer?'+2 điểm thưởng':'+4 điểm';
+    const col=isTransfer?'#27ae60':'#f1c40f';
+    desc.innerHTML=`<strong>${teams[teamIdx].name}</strong> trả lời đúng!
+      <br><span style="font-size:24px;color:${col};font-family:Oswald,sans-serif;font-weight:700">${pts}</span>
+      <br><span style="color:rgba(255,255,255,.55);font-size:13px">Tổng điểm: ${teams[teamIdx].score} điểm</span>`;
+    actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
+  } else {
+    // Show correct answer
+    box.classList.add('a-box');
+    icon.textContent='📋';
+    title.className='r-title gold';title.textContent='ĐÁP ÁN ĐÚNG';
+    const q=ALL_PACKS[currentPack][currentQIdx];
+    const keys=['A','B','C','D'];
+    const penaltyNote=penaltyTeamIdx!==null&&penaltyTeamIdx!==undefined?
+      `<br><span style="color:var(--wrong);font-size:13px">⚠ ${teams[penaltyTeamIdx].name} trả lời sai: -1 điểm (còn ${teams[penaltyTeamIdx].score} điểm)</span>`:'';
+    desc.innerHTML=`${penaltyNote}`;
+    answer.style.display='block';
+    answer.innerHTML=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
+    actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
+  }
+  overlay.classList.add('show');
+}
+
+function hideResult(){document.getElementById('rOverlay').classList.remove('show');}
+
+function nextQuestion(){
+  hideResult();
+  currentQIdx++;
+  if(currentQIdx>=10)endSession();
+  else renderQuestion();
+}
+
+// ============================================================
+// END SESSION
+// ============================================================
+function endSession(){
+  const team=teams[currentTeamIdx];
+  const correct=qResults.filter(r=>r==='correct').length;
+  const overlay=document.getElementById('rOverlay');
+  const box=document.getElementById('rBox');
+  const icon=document.getElementById('rIcon');
+  const title=document.getElementById('rTitle');
+  const desc=document.getElementById('rDesc');
+  const answer=document.getElementById('rAnswer');
+  const actions=document.getElementById('rActions');
+
+  box.className='r-box a-box';
+  icon.textContent='🏆';
+  title.className='r-title gold';title.textContent='KẾT THÚC GÓI';
+  desc.textContent=`${team.name} hoàn thành Gói ${currentPack+1}`;
+  answer.style.display='block';
+  answer.innerHTML=`<strong>Kết quả:</strong> ${correct}/10 câu đúng &nbsp;|&nbsp; <strong>+${correct*4} điểm</strong><br>Tổng điểm hiện tại: <strong>${team.score} điểm</strong>`;
+
+  const remaining=packUsed.filter(Boolean).length;
+  if(remaining<8){
+    actions.innerHTML=`
+      <button class="r-btn p" onclick="hideResult();goDraw()">ĐỘI TIẾP THEO ›</button>
+      <button class="r-btn s" onclick="hideResult();goScore()">📊 Bảng điểm</button>`;
+  }else{
+    actions.innerHTML=`
+      <button class="r-btn p" onclick="hideResult();goScore()">📊 KẾT QUẢ CHUNG CUỘC</button>
+      <button class="r-btn s" onclick="hideResult();goHome()">🏠 Trang chính</button>`;
+  }
+  overlay.classList.add('show');
+  if(correct>=8)spawnConfetti(50);
+}
+
+// ============================================================
+// SCORE BOARD
+// ============================================================
+function renderScore(){
+  const sorted=[...teams].sort((a,b)=>b.score-a.score);
+  const maxPts=Math.max(...teams.map(t=>t.score),1);
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('scList').innerHTML=sorted.map((t,i)=>`
+    <div class="sc-item">
+      <div class="sc-rank">${medals[i]||(i+1)}</div>
+      <div style="flex:1">
+        <div class="sc-name">${t.name}</div>
+        <div class="sc-detail">${t.correct} câu đúng chính (+${t.correct*4}đ) &nbsp;·&nbsp; ${t.bonus} câu thưởng (+${t.bonus*2}đ) &nbsp;·&nbsp; ${t.penalty} lần phạt (-${t.penalty}đ)</div>
+        <div class="sc-bar"><div class="sc-fill" style="width:${(t.score/maxPts*100)}%"></div></div>
+      </div>
+      <div class="sc-pts">${t.score}<span style="font-size:13px;color:rgba(255,255,255,.45)"> đ</span></div>
+    </div>`).join('');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function spawnConfetti(n=28){
+  const colors=['#f1c40f','#e74c3c','#27ae60','#3498db','#9b59b6','#e67e22','#fff'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div');el.className='confetti';
+    el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.4+Math.random()*2}s;animation-delay:${Math.random()*.5}s;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'2px'};`;
+    document.body.appendChild(el);el.addEventListener('animationend',()=>el.remove());
+  }
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function resetAll(){
+  if(!confirm('Reset toàn bộ điểm số và bắt đầu lại?'))return;
+  teams=Array.from({length:8},(_,i)=>({id:i+1,name:`ĐỘI ${i+1}`,score:0,correct:0,bonus:0,penalty:0}));
+  packUsed=Array(8).fill(false);
+  currentTeamIdx=0;
+  clearTimer5();
+  hideResult();
+  renderHome();
+}
+
+renderHome();
+</script>
+</body>
+</html>
