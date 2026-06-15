@@ -88,6 +88,17 @@
 
   /* 5-sec timer (only in transfer mode) */
   .timer-wrap{display:flex;align-items:center;gap:10px;}
+  .btn-start-timer{
+    background:linear-gradient(135deg,var(--green),#1e8449);
+    border:none;color:#fff;
+    font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;
+    padding:10px 22px;border-radius:30px;cursor:pointer;
+    letter-spacing:1px;text-transform:uppercase;
+    box-shadow:0 4px 18px rgba(39,174,96,.5);
+    transition:all .2s;
+  }
+  .btn-start-timer:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(39,174,96,.65);}
+  .btn-start-timer:disabled{opacity:.4;cursor:default;transform:none;}
   .timer-circle{width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--gold) calc(var(--pct)*1%),rgba(255,255,255,.1) 0%);display:flex;align-items:center;justify-content:center;position:relative;}
   .timer-circle::before{content:'';position:absolute;width:48px;height:48px;border-radius:50%;background:var(--darknavy);}
   .timer-num{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--gold);position:relative;z-index:1;}
@@ -243,11 +254,20 @@
   <div class="q-layout">
     <div class="q-topbar">
       <div class="q-badges">
+        <button onclick="confirmBack()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:13px;padding:5px 14px;border-radius:20px;cursor:pointer;transition:all .2s;font-family:Roboto,sans-serif" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)'">← Quay về</button>
         <div class="badge badge-red" id="qTeamBadge">ĐỘI 1</div>
         <div class="badge badge-gold" id="qPackBadge">GÓI 1</div>
         <div class="q-prog" id="qProg">Câu 1/10</div>
       </div>
-      <div class="timer-wrap">
+      <div class="timer-wrap" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button class="btn-start-timer" id="btnStartTimer" onclick="startMainTimer()">
+          ▶ BẮT ĐẦU 10 GIÂY
+        </button>
+        <!-- main 10-sec timer -->
+        <div class="timer-circle hidden-timer" id="mainTimerCircle" style="--pct:100;width:80px;height:80px;">
+          <div class="timer-num" id="mainTimerNum" style="font-size:26px">10</div>
+        </div>
+        <!-- transfer 5-sec timer -->
         <div class="timer-circle hidden-timer" id="timerCircle" style="--pct:100">
           <div class="timer-num" id="timerNum">5</div>
         </div>
@@ -401,6 +421,7 @@ const ALL_PACKS = [
 // ============================================================
 const TEAM_NAMES=['Xã Sín Thầu','Xã Mường Nhé','Xã Mường Toong','Xã Nậm Kè','Xã Quảng Lâm','Xã Mường Chà','Xã Nà Bủng','Xã Nà Hỳ'];
 let teams = Array.from({length:8},(_,i)=>({id:i+1,name:TEAM_NAMES[i],score:0,correct:0,bonus:0,penalty:0}));
+let teamPlayed = Array(8).fill(false); // track which teams have completed/been skipped
 let packUsed = Array(8).fill(false);
 let currentTeamIdx = 0;
 let currentPack = null;
@@ -412,6 +433,8 @@ let timer5 = null;
 let timer5Sec = 5;
 let answerLocked = false;
 let lastWrongIdx = -1;
+let mainTimer = null;
+let mainTimerSec = 10;
 let sessionMainCorrect = 0;
 let sessionTeamStats = {}; // {teamIdx: {correct:n, penalty:n}}
 
@@ -434,9 +457,11 @@ function goHome(){renderHome();show('homeScreen');}
 function goScore(){renderScore();show('scoreScreen');}
 
 function goDraw(){
-  const played=packUsed.filter(Boolean).length;
-  if(played>=8){alert('Tất cả 8 gói câu hỏi đã sử dụng!');return;}
-  currentTeamIdx=played;
+  // Find next team that hasn't played yet
+  const nextTeam = teamPlayed.findIndex(p=>!p);
+  if(nextTeam===-1){alert('Tất cả 8 đội đã thi xong!');return;}
+  if(packUsed.filter(Boolean).length>=8){alert('Tất cả 8 gói câu hỏi đã sử dụng!');return;}
+  currentTeamIdx=nextTeam;
   renderDraw();
   show('drawScreen');
 }
@@ -445,12 +470,11 @@ function goDraw(){
 // HOME
 // ============================================================
 function renderHome(){
-  const played = packUsed.filter(Boolean).length;
-  const nextIdx = played < 8 ? played : -1; // -1 = all done
+  const nextIdx = teamPlayed.findIndex(p=>!p); // next team to play (-1 if all done)
   document.getElementById('teamsGrid').innerHTML=teams.map((t,i)=>{
     let cls = 'team-card';
     let label = '';
-    if(i < played){ cls += ' done-turn'; label = '<div style="font-size:11px;color:#27ae60;margin-top:2px">✔ Đã thi</div>'; }
+    if(teamPlayed[i]){ cls += ' done-turn'; label = '<div style="font-size:11px;color:#27ae60;margin-top:2px">✔ Đã thi</div>'; }
     else if(i === nextIdx){ cls += ' active-turn'; label = '<div style="font-size:11px;color:#f1c40f;font-weight:700;margin-top:2px;letter-spacing:1px">▶ LƯỢT BỐC THĂM</div>'; }
     else { cls += ' waiting-turn'; }
     return `
@@ -529,6 +553,14 @@ function renderQuestion(){
   document.getElementById('tpBar').classList.remove('show');
   document.getElementById('skipBtnWrap').style.display='none';
   hideTimer();
+  clearMainTimer();
+  hideMainTimer();
+  // Show the start button, lock all answers until MC presses it
+  const sb=document.getElementById('btnStartTimer');
+  sb.style.display='inline-flex';
+  sb.disabled=false;
+  answerLocked=true;
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=true;b.removeAttribute('data-eliminated');});
 
   // Nav dots
   document.getElementById('qNav').innerHTML=Array.from({length:10},(_,i)=>{
@@ -543,6 +575,53 @@ function renderQuestion(){
 // ============================================================
 // TIMER (only for transfer 5-sec)
 // ============================================================
+function clearMainTimer(){
+  if(mainTimer){clearInterval(mainTimer);mainTimer=null;}
+}
+function hideMainTimer(){
+  clearMainTimer();
+  document.getElementById('mainTimerCircle').classList.add('hidden-timer');
+}
+function updateMainTimerUI(){
+  const num=document.getElementById('mainTimerNum');
+  const circle=document.getElementById('mainTimerCircle');
+  num.textContent=mainTimerSec;
+  num.className='timer-num'+(mainTimerSec<=3?' urgent':'');
+  const pct=(mainTimerSec/10)*100;
+  circle.style.setProperty('--pct',pct);
+  const col=mainTimerSec<=3?'#e74c3c':mainTimerSec<=5?'#e67e22':'#f1c40f';
+  circle.style.background=`conic-gradient(${col} calc(${pct}*1%),rgba(255,255,255,.1) 0%)`;
+  circle.style.width='80px';circle.style.height='80px';
+}
+function startMainTimer(){
+  clearMainTimer();
+  // Hide start button
+  const btn=document.getElementById('btnStartTimer');
+  btn.disabled=true;
+  btn.style.display='none';
+  // Unlock answers
+  answerLocked=false;
+  document.querySelectorAll('.ans-btn').forEach(b=>{
+    if(!b.getAttribute('data-eliminated')) b.disabled=false;
+  });
+  // Show and run main timer
+  const circle=document.getElementById('mainTimerCircle');
+  circle.classList.remove('hidden-timer');
+  mainTimerSec=10;
+  updateMainTimerUI();
+  mainTimer=setInterval(()=>{
+    mainTimerSec--;
+    if(mainTimerSec<=3)sndUrgent();else sndTick();
+    updateMainTimerUI();
+    if(mainTimerSec<=0){
+      clearMainTimer();
+      hideMainTimer();
+      // Time up: timer stops but answers stay enabled (KTV can still select)
+      // Transfer panel only opens if main team selects wrong answer
+    }
+  },1000);
+}
+
 function showTimer(sec){
   const circle=document.getElementById('timerCircle');
   circle.classList.remove('hidden-timer');
@@ -586,6 +665,8 @@ function startTimer5(){
 function selectAnswer(idx){
   if(answerLocked)return;
   answerLocked=true;
+  clearMainTimer();
+  hideMainTimer();
   clearTimer5();
 
   const q=ALL_PACKS[currentPack][currentQIdx];
@@ -648,6 +729,8 @@ function highlightAns(idx,correct){
 // TRANSFER
 // ============================================================
 function openTransferPanel(){
+  clearMainTimer();
+  hideMainTimer();
   isTransfer=true;
   answerLocked=true;  // stay locked until a transfer team is chosen
   // Reset answer button styles – mark the wrong answer as dimmed & permanently disabled
@@ -769,6 +852,18 @@ function revealAnswer(btn, ansHtml){
   actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
 }
 
+function confirmBack(){
+  if(confirm('Quay về trang chủ? Tiến trình gói câu hỏi hiện tại sẽ bị huỷ.')){
+    clearMainTimer();
+    clearTimer5();
+    hideResult();
+    packUsed[currentPack]=true;      // pack is consumed
+    teamPlayed[currentTeamIdx]=true; // team cannot replay
+    renderHome();
+    show('homeScreen');
+  }
+}
+
 function hideResult(){document.getElementById('rOverlay').classList.remove('show');}
 
 function nextQuestion(){
@@ -782,6 +877,7 @@ function nextQuestion(){
 // END SESSION
 // ============================================================
 function endSession(){
+  teamPlayed[currentTeamIdx]=true;
   const team=teams[currentTeamIdx];
   const correct=qResults.filter(r=>r==='correct').length;
   const overlay=document.getElementById('rOverlay');
@@ -892,6 +988,7 @@ function resetAll(){
   if(!confirm('Reset toàn bộ điểm số và bắt đầu lại?'))return;
   teams=Array.from({length:8},(_,i)=>({id:i+1,name:`ĐỘI ${i+1}`,score:0,correct:0,bonus:0,penalty:0}));
   packUsed=Array(8).fill(false);
+  teamPlayed=Array(8).fill(false);
   currentTeamIdx=0;
   clearTimer5();
   hideResult();
