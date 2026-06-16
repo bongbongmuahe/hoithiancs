@@ -133,9 +133,7 @@
   .tp-team-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--white);font-family:'Oswald',sans-serif;font-size:14px;padding:8px 17px;border-radius:20px;cursor:pointer;transition:all .2s;}
   .tp-team-btn:hover{background:rgba(255,255,255,.2);border-color:var(--gold);}
   .tp-team-btn.active{background:var(--orange);border-color:var(--orange);}
-  .tp-bar{height:7px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:12px;overflow:hidden;display:none;}
-  .tp-bar.show{display:block;}
-  .tp-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--gold));border-radius:4px;transition:width 1s linear;}
+
 
   /* Q NAV DOTS */
   .q-nav{display:flex;gap:7px;flex-wrap:wrap;padding:0 38px 18px;max-width:1100px;width:100%;margin:0 auto;}
@@ -267,10 +265,7 @@
         <div class="timer-circle hidden-timer" id="mainTimerCircle" style="--pct:100;width:80px;height:80px;">
           <div class="timer-num" id="mainTimerNum" style="font-size:26px">10</div>
         </div>
-        <!-- transfer 5-sec timer -->
-        <div class="timer-circle hidden-timer" id="timerCircle" style="--pct:100">
-          <div class="timer-num" id="timerNum">5</div>
-        </div>
+
       </div>
     </div>
 
@@ -281,8 +276,7 @@
       <div class="transfer-panel" id="transferPanel">
         <div class="tp-title">⚡ CHUYỂN QUYỀN TRẢ LỜI — Chọn đội giành quyền:</div>
         <div class="tp-teams" id="tpTeams"></div>
-        <div class="tp-bar" id="tpBar"><div class="tp-fill" id="tpFill" style="width:100%"></div></div>
-        <div id="skipBtnWrap" style="display:none;margin-top:14px;text-align:right">
+        <div id="skipBtnWrap" style="margin-top:14px;text-align:right">
           <button onclick="skipQuestion()" style="background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.3);color:#fff;font-family:Oswald,sans-serif;font-size:14px;font-weight:600;padding:9px 22px;border-radius:22px;cursor:pointer;letter-spacing:1px;transition:all .2s" onmouseover="this.style.borderColor='#f1c40f';this.style.color='#f1c40f'" onmouseout="this.style.borderColor='rgba(255,255,255,0.3)';this.style.color='#fff'">
             ⏭ BỎ QUA – CÂU TIẾP THEO
           </button>
@@ -419,7 +413,7 @@ const ALL_PACKS = [
 // ============================================================
 // STATE
 // ============================================================
-const TEAM_NAMES=['Xã Sín Thầu','Xã Mường Nhé','Xã Mường Toong','Xã Nậm Kè','Xã Quảng Lâm','Xã Mường Chà','Xã Nà Bủng','Xã Nà Hỳ'];
+const TEAM_NAMES=['Xã Mường Chà','Xã Sín Thầu','Xã Nà Bủng','Xã Nậm Kè','Xã Mường Toong','Xã Mường Nhé','Xã Nà Hỳ','Xã Quảng Lâm'];
 let teams = Array.from({length:8},(_,i)=>({id:i+1,name:TEAM_NAMES[i],score:0,correct:0,bonus:0,penalty:0}));
 let teamPlayed = Array(8).fill(false); // track which teams have completed/been skipped
 let packUsed = Array(8).fill(false);
@@ -429,8 +423,6 @@ let currentQIdx = 0;
 let qResults = [];       // null | 'correct' | 'wrong' | 'skip'
 let isTransfer = false;
 let transferTeam = null;
-let timer5 = null;
-let timer5Sec = 5;
 let answerLocked = false;
 let lastWrongIdx = -1;
 let mainTimer = null;
@@ -550,9 +542,6 @@ function renderQuestion(){
 
   // Hide transfer panel & timer
   document.getElementById('transferPanel').classList.remove('show');
-  document.getElementById('tpBar').classList.remove('show');
-  document.getElementById('skipBtnWrap').style.display='none';
-  hideTimer();
   clearMainTimer();
   hideMainTimer();
   // Show the start button, lock all answers until MC presses it
@@ -622,52 +611,11 @@ function startMainTimer(){
   },1000);
 }
 
-function showTimer(sec){
-  const circle=document.getElementById('timerCircle');
-  circle.classList.remove('hidden-timer');
-  timer5Sec=sec;
-  updateTimerUI();
-}
-function hideTimer(){
-  clearTimer5();
-  document.getElementById('timerCircle').classList.add('hidden-timer');
-}
-function updateTimerUI(){
-  const num=document.getElementById('timerNum');
-  const circle=document.getElementById('timerCircle');
-  num.textContent=timer5Sec;
-  num.className='timer-num'+(timer5Sec<=2?' urgent':'');
-  const pct=(timer5Sec/5)*100;
-  circle.style.setProperty('--pct',pct);
-  const col=timer5Sec<=2?'#e74c3c':timer5Sec<=3?'#e67e22':'#f1c40f';
-  circle.style.background=`conic-gradient(${col} calc(${pct}*1%),rgba(255,255,255,.1) 0%)`;
-}
-function clearTimer5(){if(timer5){clearInterval(timer5);timer5=null;}}
-
-function startTimer5(){
-  clearTimer5();
-  showTimer(5);
-  document.getElementById('tpBar').classList.add('show');
-  document.getElementById('tpFill').style.width='100%';
-  timer5=setInterval(()=>{
-    timer5Sec--;
-    if(timer5Sec<=2)sndUrgent();else sndTick();
-    updateTimerUI();
-    const pct=Math.max(0,(timer5Sec/5)*100);
-    document.getElementById('tpFill').style.width=pct+'%';
-    if(timer5Sec<=0){clearTimer5();document.getElementById('skipBtnWrap').style.display='block';}
-  },1000);
-}
-
-// ============================================================
-// ANSWER SELECTION
-// ============================================================
 function selectAnswer(idx){
   if(answerLocked)return;
   answerLocked=true;
   clearMainTimer();
   hideMainTimer();
-  clearTimer5();
 
   const q=ALL_PACKS[currentPack][currentQIdx];
   const correct=idx===q.ans;
@@ -704,7 +652,7 @@ function selectAnswer(idx){
       qResults[currentQIdx]='wrong';
       setTimeout(()=>openTransferPanel(),600);
     }else{
-      // Transfer team wrong → -1 point, show audience stage
+      // Transfer team wrong → -1 point, show answer
       if(respondingTeam!==currentTeamIdx){
         teams[respondingTeam].score=Math.max(0,teams[respondingTeam].score-1);
         teams[respondingTeam].penalty++;
@@ -712,7 +660,7 @@ function selectAnswer(idx){
         sessionTeamStats[respondingTeam].penalty++;
       }
       qResults[currentQIdx]='skip';
-      setTimeout(()=>showResult('audience',currentTeamIdx,null,respondingTeam),600);
+      setTimeout(()=>showResult('answer',currentTeamIdx,null,respondingTeam),600);
     }
   }
 }
@@ -754,7 +702,6 @@ function openTransferPanel(){
   document.getElementById('qTeamBadge').className='badge badge-orange';
   document.getElementById('qTeamBadge').textContent='GIÀNH QUYỀN TRẢ LỜI';
 
-  startTimer5();
 }
 
 function pickTransferTeam(idx){
@@ -774,7 +721,6 @@ function pickTransferTeam(idx){
 // SKIP (no one answers / time up in transfer)
 // ============================================================
 function skipQuestion(){
-  clearTimer5();
   answerLocked=true;
   qResults[currentQIdx]='skip';
   // Highlight correct answer
@@ -783,7 +729,7 @@ function skipQuestion(){
     b.disabled=true;
     if(i===q.ans)b.classList.add('correct');else b.classList.add('dimmed');
   });
-  showResult('audience',currentTeamIdx,null,null);
+  showResult('answer',currentTeamIdx,null,null);
 }
 
 // ============================================================
@@ -820,42 +766,18 @@ function showResult(type,teamIdx,extra,penaltyTeamIdx){
     const penaltyNote=penaltyTeamIdx!==null&&penaltyTeamIdx!==undefined?
       `<span style="color:var(--wrong);font-size:13px">⚠ ${teams[penaltyTeamIdx].name} trả lời sai: -1 điểm (còn ${teams[penaltyTeamIdx].score} điểm)</span><br><br>`:'';
 
-    if(type==='audience'){
-      // Stage 1: audience mode – hide answer, show reveal button
-      title.textContent='KHÁN GIẢ TRẢ LỜI';
-      desc.innerHTML=penaltyNote+'Mời khán giả tham gia!';
-      answer.style.display='none';
-      const ansHtml=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
-      actions.innerHTML=`
-        <button class="r-btn p" onclick="revealAnswer(this,'${ansHtml.replace(/'/g,"\'")}')">📢 CÔNG BỐ ĐÁP ÁN</button>`;
-    } else {
-      // Direct answer reveal (skip / endSession flow)
-      title.textContent='ĐÁP ÁN ĐÚNG';
-      desc.innerHTML=penaltyNote;
-      answer.style.display='block';
-      answer.innerHTML=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
-      actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
-    }
+    title.textContent='ĐÁP ÁN ĐÚNG';
+    desc.innerHTML=penaltyNote;
+    answer.style.display='block';
+    answer.innerHTML=`<strong>${keys[q.ans]}. </strong>${q.opts[q.ans].replace(/^[a-d]\.\s*/,'')}`;
+    actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
   }
   overlay.classList.add('show');
-}
-
-function revealAnswer(btn, ansHtml){
-  const answer=document.getElementById('rAnswer');
-  const actions=document.getElementById('rActions');
-  const icon=document.getElementById('rIcon');
-  const title=document.getElementById('rTitle');
-  icon.textContent='📋';
-  title.textContent='ĐÁP ÁN ĐÚNG';
-  answer.style.display='block';
-  answer.innerHTML=ansHtml;
-  actions.innerHTML=`<button class="r-btn p" onclick="nextQuestion()">CÂU TIẾP THEO ›</button>`;
 }
 
 function confirmBack(){
   if(confirm('Quay về trang chủ? Tiến trình gói câu hỏi hiện tại sẽ bị huỷ.')){
     clearMainTimer();
-    clearTimer5();
     hideResult();
     packUsed[currentPack]=true;      // pack is consumed
     teamPlayed[currentTeamIdx]=true; // team cannot replay
@@ -990,7 +912,6 @@ function resetAll(){
   packUsed=Array(8).fill(false);
   teamPlayed=Array(8).fill(false);
   currentTeamIdx=0;
-  clearTimer5();
   hideResult();
   renderHome();
   show('homeScreen');
